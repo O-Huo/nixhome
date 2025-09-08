@@ -9,12 +9,15 @@
     ./atuin
     ./starship
     ./tmux
+    ./kitty
   ];
 
   home.packages =
     [
       pkgs.btop
       pkgs.codex
+      pkgs.kitty 
+      pkgs.kitty-themes
       pkgs.claude-code
       pkgs.nix-index
       pkgs.killall

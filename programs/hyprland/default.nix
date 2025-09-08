@@ -2,13 +2,9 @@
   imports = [
     ./bind.nix
     ./waybar.nix
-    ./kitty.nix
     ./hyprpaper.nix
   ];
   home.packages = with pkgs; [
-    kitty
-    kitty-themes
-  ] ++ lib.optionals stdenv.isLinux [
     waybar
     dunst
     rofi
