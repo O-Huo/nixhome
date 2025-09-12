@@ -55,6 +55,7 @@ let
       "editor.fontSize" = 16;
       "editor.fontFamily" = "'FiraCode Nerd Font', 'Fira Code'";
       "editor.fontLigatures" = true;
+      "editor.minimap.enabled" = false;
       "terminal.integrated.fontFamily" = "'FiraCode Nerd Font', 'Fira Code'";
       "github.copilot.enable" = {
         "*" = true;
