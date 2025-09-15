@@ -31,6 +31,7 @@
       ".antlr/"
       "result"
       "server exited unexpectedly"
+      ".claude/"
     ];
   };
   programs.jujutsu = {
