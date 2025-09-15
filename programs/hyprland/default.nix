@@ -11,7 +11,7 @@
   ] ++ lib.optionals stdenv.isLinux [
     waybar
     dunst
-    rofi-wayland
+    rofi
     hyprlock
     hypridle
     hyprpaper
@@ -69,7 +69,6 @@
     enable = pkgs.stdenv.isLinux;
     systemd.enable = pkgs.stdenv.isLinux;
     plugins = [
-      pkgs.hyprlandPlugins.hyprexpo
     ];
     settings = {
       decoration = {
@@ -118,12 +117,6 @@
         no_border_on_floating = true;
       };
       plugin = {
-        hyprexpo = {
-          columns = 3;
-          gap_size = 5;
-          bg_col = "rgb(111111)";
-          workspace_method = "center current"; # [center/first] [workspace] e.g. first 1 or center m+1
-        };
       };
       windowrulev2 = [
         # IM
