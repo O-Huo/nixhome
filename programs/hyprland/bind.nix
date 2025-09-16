@@ -66,7 +66,6 @@
       "$modifier CONTROL,Q,exec, hyprlock"
       "$modifier CONTROL,S,exec, grim -g \"$(slurp -d)\" - | wl-copy"
       "$modifier,Tab,bringactivetotop"
-      "$modifier,grave,hyprexpo:expo,toggle"
       ",XF86AudioRaiseVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
       ",XF86AudioLowerVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
       " ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"

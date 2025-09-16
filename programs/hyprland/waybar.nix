@@ -92,7 +92,6 @@
       };
       "custom/launcher" = {
         format = "🦁";
-        on-click = "sleep 0.2 && hyprctl dispatch hyprexpo:expo on";
       };
     }];
   };
