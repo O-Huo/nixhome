@@ -13,6 +13,7 @@
 
   home.packages =
     [
+      pkgs.btop
       pkgs.codex
       pkgs.claude-code
       pkgs.nix-index
