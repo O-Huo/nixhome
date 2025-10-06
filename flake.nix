@@ -8,7 +8,6 @@
     };
     nixvim = {
       url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";

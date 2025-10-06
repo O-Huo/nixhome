@@ -4,17 +4,17 @@
       lsp = {
         enable = true;
         servers = {
-          nil_ls = {
-            enable = true;
-            settings.nix.flake.autoArchive = true;
-          };
-          cssls.enable = true;
-          html.enable = true;
-          bashls.enable = true;
-          pylsp.enable = true;
+          # nil_ls = {
+          #   enable = true;
+          #   settings.nix.flake.autoArchive = true;
+          # };
+          # cssls.enable = true;
+          # html.enable = true;
+          # bashls.enable = true;
+          # pylsp.enable = true;
         };
       };
-      trouble.enable = true;
+      # trouble.enable = true;
 
       noice.settings.presets."inc_rename" = true;
       inc-rename.enable = true; # Nice renaming UI
