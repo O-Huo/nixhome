@@ -3,7 +3,7 @@
     "$modifier" = "SUPER";
     bind = [
       "$modifier,Return,exec,kitty"
-      "$modifier SHIFT,Return,exec,rofi -show run"
+      "$modifier SHIFT,Return,exec,noctalia-shell ipc call launcher toggle"
       "$modifier,W,exec,firefox"
       "$modifier,T,exec,hyprctl dispatch togglegroup"
       "$modifier,C,exec,hyprctl dispatch moveoutofgroup"
@@ -63,7 +63,7 @@
       "$modifier CONTROL,left,workspace,e-1"
       "$modifier,mouse_down,workspace, e+1"
       "$modifier,mouse_up,workspace, e-1"
-      "$modifier CONTROL,Q,exec, hyprlock"
+      "$modifier CONTROL,Q,exec, noctalia-shell ipc call lockScreen toggle"
       "$modifier CONTROL,S,exec, grim -g \"$(slurp -d)\" - | wl-copy"
       "$modifier,Tab,bringactivetotop"
       ",XF86AudioRaiseVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"

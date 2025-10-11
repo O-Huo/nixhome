@@ -9,6 +9,15 @@
     nixvim = {
       url = "github:nix-community/nixvim";
     };
+    quickshell = {
+      url = "github:outfoxxed/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.quickshell.follows = "quickshell";  # Use same quickshell version
+    };
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
@@ -48,6 +57,7 @@
                 vscode-server.nixosModules.default
                 ./hosts/pittsburgh
               ];
+              specialArgs = { inherit inputs; };
             };
         "madison" =
           nixpkgs.lib.nixosSystem
@@ -57,6 +67,7 @@
                 vscode-server.nixosModules.default
                 ./hosts/madison
               ];
+              specialArgs = { inherit inputs; };
             };
         "octal" =
           nixpkgs.lib.nixosSystem
@@ -66,6 +77,7 @@
                 vscode-server.nixosModules.default
                 ./hosts/octal
               ];
+              specialArgs = { inherit inputs; };
             };
         "ruby" =
           nixpkgs.lib.nixosSystem
@@ -75,6 +87,7 @@
                 vscode-server.nixosModules.default
                 ./hosts/ruby
               ];
+              specialArgs = { inherit inputs; };
             };
         "jex" =
           nixpkgs.lib.nixosSystem
@@ -84,6 +97,7 @@
                 vscode-server.nixosModules.default
                 ./hosts/jex
               ];
+              specialArgs = { inherit inputs; };
             };
       };
 

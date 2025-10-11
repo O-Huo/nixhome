@@ -1,7 +1,7 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }: {
   imports = [
     (import ../common {
-      inherit pkgs;
+      inherit pkgs inputs;
       withNvidia = false;
     })
     ./hardware-configuration.nix

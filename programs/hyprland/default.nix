@@ -1,16 +1,86 @@
 { pkgs, lib, inputs, config, ... }: {
   imports = [
+    inputs.noctalia.homeModules.default
     ./bind.nix
-    ./waybar.nix
-    ./hyprpaper.nix
   ];
+  programs.noctalia-shell = {
+    enable = true;
+    settings = {
+      bar = {
+        density = "compact";
+        position = "top";
+        showCapsule = false;
+        widgets = {
+          left = [
+            {
+              id = "SidePanelToggle";
+              useDistroLogo = true;
+            }
+            {
+              id = "WiFi";
+            }
+            {
+              id = "Bluetooth";
+            }
+            {
+              id = "ActiveWindow";
+            }
+          ];
+          center = [
+            {
+              hideUnoccupied = false;
+              id = "Workspace";
+              labelMode = "none";
+            }
+          ];
+          right = [
+            {
+              id = "SystemMonitor";
+            }
+            {
+              id = "NotificationHistory";
+            }
+            {
+              formatHorizontal = "HH:mm";
+              formatVertical = "HH mm";
+              id = "Clock";
+              useMonospacedFont = true;
+              usePrimaryColor = true;
+            }
+          ];
+        };
+      };
+      colorSchemes = {
+        predefinedScheme = "Catppuccin";
+        darkMode = false;
+      };
+      wallpaper = {
+        enabled = true;
+        directory = ./imgs;
+        enableMultiMonitorDirectories = false;
+        setWallpaperOnAllMonitors = true;
+        defaultWallpaper = "";
+        fillMode = "crop";
+        fillColor = "#000000";
+        randomEnabled = true;
+        randomIntervalSec = 300;
+        transitionDuration = 1500;
+        transitionType = "random";
+        transitionEdgeSmoothness = 0.05;
+      };
+      appLauncher = {
+        enableClipboardHistory = false;
+        position = "center";
+        backgroundOpacity = 1;
+        pinnedExecs = [ ];
+        useApp2Unit = false;
+        sortByMostUsed = true;
+        terminalCommand = "xterm -e";
+      };
+    };
+  };
   home.packages = with pkgs; [
-    waybar
-    dunst
-    rofi
-    hyprlock
     hypridle
-    hyprpaper
     grim
     slurp
     wl-clipboard
@@ -42,14 +112,14 @@
       settings = {
         general = {
           after_sleep_cmd = "hyprctl dispatch dpms on";
-          before_sleep_cmd = "hyprlock";
+          before_sleep_cmd = "noctalia-shell ipc call lockScreen toggle";
           ignore_dbus_inhibit = false;
-          lock_cmd = "hyprlock";
+          lock_cmd = "noctalia-shell ipc call lockScreen toggle";
         };
         listener = [
           {
             timeout = 120;  # Reduce screen lock timeout for battery saving
-            on-timeout = "hyprlock";
+            on-timeout = "noctalia-shell ipc call lockScreen toggle";
           }
           {
             timeout = 150;  # Turn off display sooner
@@ -141,15 +211,14 @@
         "nofocus, class:^(.*jetbrains.*)$, title:^\\s$"
       ];
       exec-once = [
-        "${pkgs.waybar}/bin/waybar"
         "fcitx5 -d"
         "blueman-applet"
         "nm-applet --indicator"
         "hyprctl setcursor catppuccin-latte-red-cursors 30"
         "hyprshell run"
       ] ++ lib.optionals (config.programs.atuin.enable or false) [
-        "atuin daemon&"
-      ];
+          "atuin daemon&"
+        ];
     };
   };
 }

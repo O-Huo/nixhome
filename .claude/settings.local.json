@@ -4,7 +4,13 @@
       "Bash(cargo:*)",
       "Bash(nix show-config:*)",
       "Bash(nix config:*)",
-      "Bash(hostnamectl:*)"
+      "Bash(hostnamectl:*)",
+      "Bash(nix flake check:*)",
+      "Bash(nix search:*)",
+      "Bash(systemctl status:*)",
+      "Read(//nix/store/**)",
+      "Bash(cat:*)",
+      "Bash(uwsm:*)"
     ],
     "deny": []
   }

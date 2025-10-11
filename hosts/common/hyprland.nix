@@ -1,24 +1,21 @@
-{pkgs, lib, ... }:
+{pkgs, lib, inputs, ... }:
 {
+  environment.systemPackages = with pkgs; [
+    inputs.noctalia.packages.${system}.default
+  ];
+  imports = [
+    inputs.noctalia.nixosModules.default
+  ];
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
     withUWSM = true;
   };
+  services.noctalia-shell.enable = true;
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "0";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     MOZ_ENABLE_WAYLAND = "0";
-  };
-  programs.uwsm = {
-    enable = true;
-    waylandCompositors = {
-      hyprland = {
-        prettyName = "Hyprland";
-        comment = "Hyprland compositor managed by UWSM";
-        binPath = "/run/current-system/sw/bin/Hyprland";
-      };
-    };
   };
   services.gnome.gnome-keyring.enable = true;
   services.greetd = {
@@ -26,7 +23,7 @@
     settings = rec {
       tuigreet_session =
         let
-          session = "/run/current-system/sw/bin/Hyprland";
+          session = "uwsm start hyprland.desktop";
           tuigreet = "${lib.makeBinPath [ pkgs.greetd.tuigreet ]}/tuigreet";
         in
           {
