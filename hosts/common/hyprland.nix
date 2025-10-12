@@ -20,17 +20,11 @@
   services.gnome.gnome-keyring.enable = true;
   services.greetd = {
     enable = true;
-    settings = rec {
-      tuigreet_session =
-        let
-          session = "uwsm start hyprland.desktop";
-          tuigreet = "${lib.makeBinPath [ pkgs.greetd.tuigreet ]}/tuigreet";
-        in
-          {
-          command = "${tuigreet} --time --remember --cmd ${session}";
-          user = "greeter";
-        };
-      default_session = tuigreet_session;
+    settings = {
+      default_session = {
+        command = "${lib.makeBinPath [ pkgs.greetd.tuigreet ]}/tuigreet --time --remember --remember-session --sessions ${pkgs.hyprland}/share/wayland-sessions";
+        user = "greeter";
+      };
     };
   };
 }
