@@ -38,8 +38,12 @@
 
   programs.git = {
     enable = true;
-    userName = "XiangpengHao";
-    userEmail = "me@xiangpeng.systems";
+    settings = {
+      user = {
+        name = "XiangpengHao";
+        email = "me@xiangpeng.systems";
+      };
+    };
   };
 
   programs.jujutsu = {
