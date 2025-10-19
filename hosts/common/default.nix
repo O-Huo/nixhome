@@ -187,11 +187,6 @@
   services.tailscale.enable = true;
   services.tailscale.useRoutingFeatures = "both";
 
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda";
-  };
-
   nix.settings.experimental-features = pkgs.lib.mkForce [ "nix-command" "flakes" ];
   nix.settings.substituters = [
     "https://nix-community.cachix.org"
