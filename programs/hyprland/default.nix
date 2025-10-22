@@ -112,14 +112,14 @@
       settings = {
         general = {
           after_sleep_cmd = "hyprctl dispatch dpms on";
-          before_sleep_cmd = "noctalia-shell ipc call lockScreen toggle";
+          before_sleep_cmd = "noctalia-shell ipc call lockScreen lock";
           ignore_dbus_inhibit = false;
-          lock_cmd = "noctalia-shell ipc call lockScreen toggle";
+          lock_cmd = "noctalia-shell ipc call lockScreen lock";
         };
         listener = [
           {
             timeout = 120;  # Reduce screen lock timeout for battery saving
-            on-timeout = "noctalia-shell ipc call lockScreen toggle";
+            on-timeout = "noctalia-shell ipc call lockScreen lock";
           }
           {
             timeout = 150;  # Turn off display sooner
