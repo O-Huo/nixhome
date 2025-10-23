@@ -63,7 +63,7 @@
       "$modifier CONTROL,left,workspace,e-1"
       "$modifier,mouse_down,workspace, e+1"
       "$modifier,mouse_up,workspace, e-1"
-      "$modifier CONTROL,Q,exec, noctalia-shell ipc call lockScreen toggle"
+      "$modifier CONTROL,Q,exec, noctalia-shell ipc call lockScreen lock"
       "$modifier CONTROL,S,exec, grim -g \"$(slurp -d)\" - | wl-copy"
       "$modifier,Tab,bringactivetotop"
       ",XF86AudioRaiseVolume,exec,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
