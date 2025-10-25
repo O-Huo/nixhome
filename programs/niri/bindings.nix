@@ -19,7 +19,7 @@
       "Mod+T".action.spawn = "kitty";
       "Mod+D".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
       "Super+Alt+L".action.spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
-      "Super+Ctrl+S".action.spawn = [ "grim" "-g" "\"$(slurp -d)\"" "-" "|" "wl-copy" ];
+      "Super+Ctrl+S".action.spawn = [ "bash" "-c" "grim -g \"$(slurp -d)\" - | wl-copy" ];
 
       # You can also use a shell. Do this if you need pipes, multiple commands, etc.
       # Note: the entire command goes as a single argument in the end.
