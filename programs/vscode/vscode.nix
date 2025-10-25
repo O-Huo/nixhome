@@ -52,6 +52,7 @@ let
     ];
     
     profiles.default.userSettings = {
+      "editor.experimentalGpuAcceleration" = "off";
       "editor.fontSize" = 16;
       "editor.fontFamily" = "'FiraCode Nerd Font', 'Fira Code'";
       "editor.fontLigatures" = true;

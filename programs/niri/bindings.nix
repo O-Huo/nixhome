@@ -18,7 +18,7 @@
       # Suggested binds for running programs: terminal, app launcher, screen locker.
       "Mod+T".action.spawn = "kitty";
       "Mod+D".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
-      "Super+Alt+L".action.spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
+      "Super+Ctrl+Q".action.spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
       "Super+Ctrl+S".action.spawn = [ "bash" "-c" "grim -g \"$(slurp -d)\" - | wl-copy" ];
 
       # You can also use a shell. Do this if you need pipes, multiple commands, etc.

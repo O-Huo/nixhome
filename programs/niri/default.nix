@@ -38,6 +38,10 @@
               id = "SystemMonitor";
             }
             {
+              id = "Tray";
+              blacklist = [ "*Bluetooth*" ];
+            }
+            {
               id = "NotificationHistory";
             }
             {
@@ -63,7 +67,7 @@
         fillMode = "crop";
         fillColor = "#000000";
         randomEnabled = true;
-        randomIntervalSec = 300;
+        randomIntervalSec = 30000;
         transitionDuration = 1500;
         transitionType = "random";
         transitionEdgeSmoothness = 0.05;
@@ -84,6 +88,7 @@
     grim
     slurp
     wl-clipboard
+    xwayland-satellite
   ];
 
   xdg = {
@@ -135,6 +140,10 @@
     package = pkgs.niri-unstable;
 
     settings = {
+      cursor.size = 48;
+      debug = {
+        wait-for-frame-completion-before-queueing = [];
+      };
       spawn-at-startup = [
           {
             command = ["fcitx5" "-d"];
