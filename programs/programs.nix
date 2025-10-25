@@ -14,6 +14,7 @@
 
   home.packages =
     [
+      pkgs.cachix
       pkgs.btop
       pkgs.codex
       pkgs.kitty 

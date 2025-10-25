@@ -1,7 +1,14 @@
-{ lib
+{ 
+  inputs
+, lib
 , pkgs
 , ...
 }: {
+  nixpkgs = {
+    overlays = [
+      inputs.niri.overlays.niri
+    ];
+  };
   imports = [
     ./shell
     ./programs/programs.nix
@@ -19,10 +26,5 @@
   catppuccin = {
     enable = true;
     flavor = "latte";
-    cursors = {
-      enable = pkgs.stdenv.isLinux;
-      flavor = "latte";
-      accent = "sky";
-    };
   };
 }

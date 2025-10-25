@@ -7,7 +7,7 @@
 , ...
 }: {
   imports = [
-    ./hyprland.nix
+    ./niri.nix
   ];
 
   boot.kernelPackages = pkgs.lib.mkDefault pkgs.linuxPackages_latest;
@@ -163,6 +163,9 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    inputs.niri.overlays.niri
+  ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

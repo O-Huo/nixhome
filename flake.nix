@@ -1,5 +1,15 @@
 {
   description = "My Nix environment";
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://niri.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+    ];
+  };
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
@@ -18,6 +28,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.quickshell.follows = "quickshell";  # Use same quickshell version
     };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
@@ -32,6 +46,7 @@
     , nur
     , catppuccin
     , hyprshell
+    , niri
     , ...
     } @ inputs:
     let
@@ -44,111 +59,45 @@
 
       # Import shells function properly
       importShells = pkgs: import ./shells.nix pkgs;
-    in
-    {
-      packages = home-manager.packages; # Support bootstrapping Home Manager.
-
-      nixosConfigurations = {
-        "pittsburgh" =
-          nixpkgs.lib.nixosSystem
-            {
-              modules = [
-                nur.modules.nixos.default
-                vscode-server.nixosModules.default
-                ./hosts/pittsburgh
-              ];
-              specialArgs = { inherit inputs; };
-            };
-        "madison" =
-          nixpkgs.lib.nixosSystem
-            {
-              modules = [
-                nur.modules.nixos.default
-                vscode-server.nixosModules.default
-                ./hosts/madison
-              ];
-              specialArgs = { inherit inputs; };
-            };
-        "octal" =
-          nixpkgs.lib.nixosSystem
-            {
-              modules = [
-                nur.modules.nixos.default
-                vscode-server.nixosModules.default
-                ./hosts/octal
-              ];
-              specialArgs = { inherit inputs; };
-            };
-        "ruby" =
-          nixpkgs.lib.nixosSystem
-            {
-              modules = [
-                nur.modules.nixos.default
-                vscode-server.nixosModules.default
-                ./hosts/ruby
-              ];
-              specialArgs = { inherit inputs; };
-            };
-        "jex" =
-          nixpkgs.lib.nixosSystem
-            {
-              modules = [
-                nur.modules.nixos.default
-                vscode-server.nixosModules.default
-                ./hosts/jex
-              ];
-              specialArgs = { inherit inputs; };
-            };
+      hosts = ["pittsburgh" "madison" "octal" "ruby" "jex"];
+      mkHost = host: {
+        ${host} = nixpkgs.lib.nixosSystem {
+          modules = [
+            nur.modules.nixos.default
+            vscode-server.nixosModules.default
+            ./hosts/${host}
+          ];
+          specialArgs = { inherit inputs; };
+        };
       };
 
-      homeConfigurations = {
-        "aoli@ruby" = home-manager.lib.homeManagerConfiguration {
+      accounts = ["aoli@ruby" "aoli@octal" "aoli@jex" "hao@linux"];
+      mkAccount = account:
+      let
+        parts = nixpkgs.lib.splitString "@" account;
+        user  = builtins.elemAt parts 0;
+        host  = builtins.elemAt parts 1;
+      in {
+        "${account}" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsX86;
           modules = [
-            ./programs/accounts/aoli.nix
-            ./programs/hosts/ruby.nix
-            ./programs/hyprland
+            (./programs/accounts + "/${user}.nix")
+            (./programs/hosts + "/${host}.nix")
+            niri.homeModules.niri
+            ./programs/niri
             ./home.nix
             nixvim.homeModules.nixvim
             catppuccin.homeModules.catppuccin
           ];
           extraSpecialArgs = { inherit inputs; };
         };
-        "aoli@octal" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsX86;
-          modules = [
-            ./programs/accounts/aoli.nix
-            ./programs/hosts/octal.nix
-            ./programs/hyprland
-            ./home.nix
-            nixvim.homeModules.nixvim
-            catppuccin.homeModules.catppuccin
-          ];
-          extraSpecialArgs = { inherit inputs; };
-        };
-        "aoli@jex" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsX86;
-          modules = [
-            ./programs/accounts/aoli.nix
-            ./programs/hyprland
-            ./programs/hosts/jex.nix
-            ./home.nix
-            nixvim.homeModules.nixvim
-            catppuccin.homeModules.catppuccin
-          ];
-          extraSpecialArgs = { inherit inputs; };
-        };
-        "hao@linux" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsX86;
-          modules = [
-            ./programs/accounts/hao.nix
-            ./programs/hyprland
-            ./home.nix
-            nixvim.homeModules.nixvim
-            catppuccin.homeModules.catppuccin
-          ];
-          extraSpecialArgs = { inherit inputs; };
-        };
+      };
+    in
+    {
+      packages = home-manager.packages; 
+
+      nixosConfigurations = nixpkgs.lib.mergeAttrsList (map mkHost hosts);
+      homeConfigurations = nixpkgs.lib.mergeAttrsList (map mkAccount accounts) // {
         "aoli@darwin" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsArm;
           modules = [
