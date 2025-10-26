@@ -14,6 +14,7 @@
 
   home.packages =
     [
+      pkgs.ripgrep
       pkgs.cachix
       pkgs.btop
       pkgs.codex

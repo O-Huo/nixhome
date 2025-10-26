@@ -21,6 +21,8 @@
       "Super+Ctrl+Q".action.spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
       "Super+Ctrl+S".action.spawn = [ "bash" "-c" "grim -g \"$(slurp -d)\" - | wl-copy" ];
 
+      "Mod+W".action.toggle-column-tabbed-display = {};
+
       # You can also use a shell. Do this if you need pipes, multiple commands, etc.
       # Note: the entire command goes as a single argument in the end.
       # Mod+T { spawn "bash" "-c" "notify-send hello && exec alacritty"; }
@@ -232,10 +234,6 @@
       # since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
       # Mod+Space       { switch-layout "next"; }
       # Mod+Shift+Space { switch-layout "prev"; }
-
-      "Print".action.screenshot = {};
-      "Ctrl+Print".action.screenshot-screen = {};
-      "Alt+Print".action.screenshot-window = {};
 
       # The quit action will show a confirmation dialog to avoid accidental exits.
       "Mod+Shift+E".action.quit = {};
