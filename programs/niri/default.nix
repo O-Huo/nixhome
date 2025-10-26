@@ -89,6 +89,7 @@
     slurp
     wl-clipboard
     xwayland-satellite
+    nordic
   ];
 
   xdg = {
@@ -140,7 +141,10 @@
     package = pkgs.niri-unstable;
 
     settings = {
-      cursor.size = 48;
+      cursor = {
+        theme = "Nordic-cursors";
+        size = 48;
+      };
       debug = {
         wait-for-frame-completion-before-queueing = [];
       };
