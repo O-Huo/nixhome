@@ -2,8 +2,22 @@
   programs.noctalia-shell.settings.location = {
     name = "Pittsburgh, United States";
   };
-  wayland.windowManager.hyprland.extraConfig = "
-    monitor=HDMI-A-4, 2560x1440@60, 0x0, 1
-    monitor=DP-6, 2560x1440@60, 2560x0, 1, 
-    ";
+  programs.niri.settings = {
+    outputs."HDMI-A-4" = {
+      scale = 1;
+      mode = {
+        width = 2560;
+        height = 1440;
+        refresh = 60.000;
+      };
+    };
+    outputs."DP-6" = {
+      scale = 1;
+      mode = {
+        width = 2560;
+        height = 1440;
+        refresh = 60.000;
+      };
+    };
+  };
 }
