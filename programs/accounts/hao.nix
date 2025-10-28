@@ -26,6 +26,7 @@
     (llama-cpp.override { cudaSupport = true; })
     samply
     ripgrep
+    bpftrace
   ];
 
   programs.btop = {
