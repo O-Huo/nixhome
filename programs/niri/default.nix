@@ -6,6 +6,10 @@
   programs.noctalia-shell = {
     enable = true;
     settings = {
+      dock = {
+        enabled = true;
+        displayMode = "auto_hide";
+      };
       bar = {
         density = "compact";
         position = "top";
