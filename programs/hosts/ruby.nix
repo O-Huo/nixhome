@@ -3,6 +3,10 @@
     name = "Pittsburgh, United States";
   };
   programs.niri.settings = {
+    cursor = {
+        theme = "Nordic-cursors";
+        size = 36;
+      };
     outputs."HDMI-A-4" = {
       scale = 1;
       mode = {
