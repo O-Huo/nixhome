@@ -32,6 +32,7 @@
       "result"
       "server exited unexpectedly"
       ".claude/"
+      "settings.local.json"
     ];
   };
   programs.jujutsu = {
