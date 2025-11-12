@@ -2,23 +2,22 @@
   inputs
 , lib
 , pkgs
+, isLinux ? false
 , ...
 }: {
   nixpkgs = {
-    overlays = [
-      inputs.niri.overlays.niri
-    ];
+    overlays = lib.optional isLinux inputs.niri.overlays.niri;
   };
   imports = [
     ./shell
     ./programs/programs.nix
   ];
-  home.pointerCursor = {
+  home.pointerCursor = lib.mkIf isLinux {
     package = pkgs.nordic;
     name = "Nordic-cursors";
     size = 48;
-    gtk.enable = pkgs.stdenv.isLinux;
-    x11.enable = pkgs.stdenv.isLinux;
+    gtk.enable = true;
+    x11.enable = true;
   };
   home = {
     # This value determines the Home Manager release that your configuration is
