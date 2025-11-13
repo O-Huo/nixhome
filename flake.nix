@@ -89,7 +89,10 @@
             nixvim.homeModules.nixvim
             catppuccin.homeModules.catppuccin
           ];
-          extraSpecialArgs = { inherit inputs; };
+          extraSpecialArgs = {
+            inherit inputs;
+            isLinux = pkgsX86.stdenv.isLinux;
+          };
         };
       };
     in
@@ -106,6 +109,10 @@
             nixvim.homeModules.nixvim
             catppuccin.homeModules.catppuccin
           ];
+          extraSpecialArgs = {
+            inherit inputs;
+            isLinux = pkgsArm.stdenv.isLinux;
+          };
         };
       };
 
