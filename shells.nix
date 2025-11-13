@@ -56,14 +56,32 @@ with pkgs; {
     ];
   };
 
+  rust = mkShellNoCC {
+    buildInputs = [
+      rustc
+      openssl
+      pkg-config
+      eza
+      fd
+      kaniVerifier
+      llvmPackages.bintools
+      lldb
+      cargo-fuzz
+      bpftrace
+      perf
+      inferno
+      cargo-flamegraph
+    ];
+  };
+
   clojure =
     mkShellNoCC
-      {
-        buildInputs = [
-          leiningen
-          gnuplot
-          graphviz
-          jdk11
-        ];
-      };
+    {
+      buildInputs = [
+        leiningen
+        gnuplot
+        graphviz
+        jdk11
+      ];
+    };
 }
