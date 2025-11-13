@@ -1,8 +1,11 @@
 import argparse
 import subprocess
 import sys
+import os
 from pathlib import Path
 from git import Repo, InvalidGitRepositoryError
+
+PATH = os.environ.get("NIXHOME_PATH", "")
 
 
 def run(cmd: list[str]) -> None:
@@ -17,7 +20,7 @@ def main() -> None:
     parser.add_argument("name")
     args = parser.parse_args()
 
-    Path(".envrc").write_text(f"use flake ~/repos/env#{args.name}\n")
+    Path(".envrc").write_text(f"use flake {PATH}#{args.name}\n")
     run(["direnv", "allow"])
 
     try:

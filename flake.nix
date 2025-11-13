@@ -35,8 +35,6 @@
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
-    hyprshell.url = "github:H3rmt/hyprshell?ref=hyprshell-release";
-    hyprshell.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs =
     { nixpkgs
@@ -45,7 +43,6 @@
     , vscode-server
     , nur
     , catppuccin
-    , hyprshell
     , niri
     , ...
     } @ inputs:

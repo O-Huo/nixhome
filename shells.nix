@@ -56,14 +56,13 @@ with pkgs; {
     ];
   };
 
-  rust = mkShellNoCC {
+  rust = mkShell {
     buildInputs = [
       rustc
       openssl
       pkg-config
       eza
       fd
-      kaniVerifier
       llvmPackages.bintools
       lldb
       cargo-fuzz
@@ -71,6 +70,8 @@ with pkgs; {
       perf
       inferno
       cargo-flamegraph
+      cargo
+      protobuf
     ];
   };
 
