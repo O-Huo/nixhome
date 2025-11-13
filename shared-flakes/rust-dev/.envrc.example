@@ -1,0 +1,5 @@
+# Example .envrc file
+# Copy this to any Rust project's .envrc file
+
+use flake ~/repos/nixhome/shared-flakes/rust-dev
+

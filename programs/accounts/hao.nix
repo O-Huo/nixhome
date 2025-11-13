@@ -27,6 +27,9 @@
     samply
     ripgrep
     bpftrace
+    perf
+    inferno
+    cargo-flamegraph
   ];
 
   programs.btop = {
