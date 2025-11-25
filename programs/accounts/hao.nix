@@ -23,7 +23,6 @@
     cargo-edit
     cargo-insta
     uv
-    (llama-cpp.override { cudaSupport = true; })
     samply
     ripgrep
     bpftrace
