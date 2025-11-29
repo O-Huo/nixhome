@@ -1,0 +1,12 @@
+diff --git a/src/backend/tty.rs b/src/backend/tty.rs
+index 407596f6..2fee0a8c 100644
+--- a/src/backend/tty.rs
++++ b/src/backend/tty.rs
+@@ -1826,6 +1826,7 @@ impl Tty {
+                 return rv;
+             }
+         };
++        surface.compositor.reset_buffer_ages();
+ 
+         // Render the elements.
+         let mut elements =
