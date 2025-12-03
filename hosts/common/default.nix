@@ -10,7 +10,6 @@
     ./niri.nix
   ];
 
-  boot.kernelPackages = pkgs.lib.mkDefault pkgs.linuxPackages_latest;
   boot.kernel.sysctl."kernel.yama.ptrace_scope" = 0;
   virtualisation.containers.enable = true;
   virtualisation = {
@@ -133,6 +132,7 @@
     else [ ];
   hardware.nvidia.open = false;
   hardware.nvidia.modesetting.enable = withNvidia;
+  boot.blacklistedKernelModules = pkgs.lib.optionals withNvidia [ "amdgpu" ];
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 

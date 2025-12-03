@@ -10,7 +10,7 @@
         theme = "Nordic-cursors";
         size = 96;
       };
-    outputs."DP-6" = {
+    outputs."DP-3" = {
       scale = 1.5;
       mode = {
         width = 3840;

@@ -47,19 +47,11 @@
     , ...
     } @ inputs:
     let
-      niriOverlay = final: prev: {
-        niri-unstable = prev.niri-unstable.overrideAttrs (old: {
-          patches = (old.patches or []) ++ [ ./patches/niri.patch ];
-        });
-      };
-
       pkgsX86 = import nixpkgs {
         system = "x86_64-linux";
-        overlays = [ niriOverlay ];
       };
       pkgsArm = import nixpkgs {
         system = "aarch64-darwin";
-        overlays = [ niriOverlay ];
       };
 
       # Import shells function properly

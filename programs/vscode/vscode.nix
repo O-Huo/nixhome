@@ -33,22 +33,17 @@ let
       ms-python.python
       ms-toolsai.jupyter
       esbenp.prettier-vscode
-      eamodio.gitlens
       vscodevim.vim
       mkhl.direnv
       jnoortheen.nix-ide
       ms-vscode-remote.vscode-remote-extensionpack
       ms-vscode-remote.remote-ssh
-      james-yu.latex-workshop
       ms-python.debugpy
       ms-python.pylint
       ms-python.vscode-pylance
       github.copilot
       github.copilot-chat
       tamasfe.even-better-toml
-      llvm-vs-code-extensions.vscode-clangd
-      myriad-dreamin.tinymist
-      golang.go
     ];
     
     profiles.default.userSettings = {

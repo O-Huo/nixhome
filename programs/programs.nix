@@ -18,6 +18,8 @@
       pkgs.cachix
       pkgs.btop
       pkgs.codex
+      pkgs.pciutils
+      pkgs.code-cursor
       pkgs.kitty 
       pkgs.kitty-themes
       pkgs.claude-code
