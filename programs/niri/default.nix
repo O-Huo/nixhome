@@ -145,9 +145,6 @@
     package = pkgs.niri-unstable;
 
     settings = {
-      debug = {
-        wait-for-frame-completion-before-queueing = [];
-      };
       spawn-at-startup = [
           {
             command = ["fcitx5" "-d"];
