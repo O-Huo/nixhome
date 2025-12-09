@@ -83,6 +83,7 @@
       pkgs.gnupg
       pkgs.seahorse
       pkgs.gnome-keyring
+      pkgs.xdg-desktop-portal-gnome
     ]
     ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
       pkgs.alt-tab-macos
