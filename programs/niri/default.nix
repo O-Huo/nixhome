@@ -109,6 +109,7 @@
       enable = pkgs.stdenv.isLinux;
       extraPortals = [
         pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-gnome
       ];
     };
   };
