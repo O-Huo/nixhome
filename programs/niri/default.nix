@@ -146,6 +146,12 @@
     package = pkgs.niri-unstable;
 
     settings = {
+      window-rules = [
+        {
+          matches = [{ app-id = "^kitty-yazi$"; }];
+          open-floating = true;
+        }
+      ];
       spawn-at-startup = [
           {
             command = ["fcitx5" "-d"];

@@ -8,7 +8,7 @@
   programs.niri.settings = {
     cursor = {
         theme = "Nordic-cursors";
-        size = 96;
+        size = 48;
       };
     outputs."DP-3" = {
       scale = 1.5;

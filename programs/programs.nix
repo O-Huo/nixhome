@@ -10,11 +10,13 @@
     ./starship
     ./tmux
     ./kitty
+    ./yazi
   ];
 
   home.packages =
     [
       pkgs.ripgrep
+      pkgs.dragon-drop
       pkgs.cachix
       pkgs.btop
       pkgs.codex
