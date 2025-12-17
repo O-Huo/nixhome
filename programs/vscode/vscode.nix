@@ -20,10 +20,10 @@ let
     ../mutable.nix
   ];
 
-  # home.file = lib.genAttrs pathsToMakeWritable (_: {
-  #     force = true;
-  #     mutable = true;
-  # });
+  home.file = lib.genAttrs pathsToMakeWritable (_: {
+      force = true;
+      mutable = true;
+  });
   programs.vscode = {
     enable = true;
     package = pkgs.vscode;
@@ -44,6 +44,8 @@ let
       github.copilot
       github.copilot-chat
       tamasfe.even-better-toml
+      james-yu.latex-workshop
+      hediet.vscode-drawio
     ];
     
     profiles.default.userSettings = {
@@ -58,7 +60,6 @@ let
         "plaintext" = false;
         "markdown" = true;
         "scminput" = false;
-        "latex" = false;
       };
       "github.copilot.nextEditSuggestions.enabled" = true;
       "jupyter.askForKernelRestart" = false;

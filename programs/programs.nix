@@ -55,7 +55,6 @@
       pkgs.fira-code
       pkgs.fira-code-symbols
       pkgs.slack
-      pkgs.zoom-us
       (pkgs.python3.withPackages (ps:
         with ps; [
           numpy
