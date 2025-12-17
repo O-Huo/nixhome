@@ -12,7 +12,7 @@
   programs.niri.settings = {
     cursor = {
         theme = "Nordic-cursors";
-        size = 48;
+        size = 36;
       };
     outputs."eDP-1" = {
       scale = 1;
