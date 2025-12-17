@@ -17,7 +17,7 @@
         widgets = {
           left = [
             {
-              id = "SidePanelToggle";
+              id = "ControlCenter";
               useDistroLogo = true;
             }
             {
@@ -38,6 +38,11 @@
             }
           ];
           right = [
+            {
+              alwaysShowPercentage = false;
+              id = "Battery";
+              warningThreshold = 30;
+            }
             {
               id = "SystemMonitor";
             }

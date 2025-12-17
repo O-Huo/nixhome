@@ -86,6 +86,8 @@
     Option "DRI" "3"
     Option "TearFree" "true"
   '';
+
+  services.upower.enable = true;
   
   # Bluetooth power optimization
   hardware.bluetooth.settings = {
