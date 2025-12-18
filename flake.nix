@@ -26,7 +26,7 @@
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";  # Use same quickshell version
+      inputs.quickshell.follows = "quickshell"; # Use same quickshell version
     };
     niri = {
       url = "github:sodiboo/niri-flake";
@@ -37,15 +37,16 @@
     nur.url = "github:nix-community/nur";
   };
   outputs =
-    { nixpkgs
-    , home-manager
-    , nixvim
-    , vscode-server
-    , nur
-    , catppuccin
-    , niri
-    , ...
-    } @ inputs:
+    {
+      nixpkgs,
+      home-manager,
+      nixvim,
+      vscode-server,
+      nur,
+      catppuccin,
+      niri,
+      ...
+    }@inputs:
     let
       pkgsX86 = import nixpkgs {
         system = "x86_64-linux";
@@ -56,7 +57,13 @@
 
       # Import shells function properly
       importShells = pkgs: import ./shells.nix pkgs;
-      hosts = ["pittsburgh" "madison" "octal" "ruby" "jex"];
+      hosts = [
+        "pittsburgh"
+        "madison"
+        "octal"
+        "ruby"
+        "jex"
+      ];
       mkHost = host: {
         ${host} = nixpkgs.lib.nixosSystem {
           modules = [
@@ -68,33 +75,40 @@
         };
       };
 
-      accounts = ["aoli@ruby" "aoli@octal" "aoli@jex" "hao@linux"];
-      mkAccount = account:
-      let
-        parts = nixpkgs.lib.splitString "@" account;
-        user  = builtins.elemAt parts 0;
-        host  = builtins.elemAt parts 1;
-      in {
-        "${account}" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsX86;
-          modules = [
-            (./programs/accounts + "/${user}.nix")
-            (./programs/hosts + "/${host}.nix")
-            niri.homeModules.niri
-            ./programs/niri
-            ./home.nix
-            nixvim.homeModules.nixvim
-            catppuccin.homeModules.catppuccin
-          ];
-          extraSpecialArgs = {
-            inherit inputs;
-            isLinux = pkgsX86.stdenv.isLinux;
+      accounts = [
+        "aoli@ruby"
+        "aoli@octal"
+        "aoli@jex"
+        "hao@linux"
+      ];
+      mkAccount =
+        account:
+        let
+          parts = nixpkgs.lib.splitString "@" account;
+          user = builtins.elemAt parts 0;
+          host = builtins.elemAt parts 1;
+        in
+        {
+          "${account}" = home-manager.lib.homeManagerConfiguration {
+            pkgs = pkgsX86;
+            modules = [
+              (./programs/accounts + "/${user}.nix")
+              (./programs/hosts + "/${host}.nix")
+              niri.homeModules.niri
+              ./programs/niri
+              ./home.nix
+              nixvim.homeModules.nixvim
+              catppuccin.homeModules.catppuccin
+            ];
+            extraSpecialArgs = {
+              inherit inputs;
+              isLinux = pkgsX86.stdenv.isLinux;
+            };
           };
         };
-      };
     in
     {
-      packages = home-manager.packages; 
+      packages = home-manager.packages;
 
       nixosConfigurations = nixpkgs.lib.mergeAttrsList (map mkHost hosts);
       homeConfigurations = nixpkgs.lib.mergeAttrsList (map mkAccount accounts) // {
