@@ -15,7 +15,7 @@
       mode = {
         width = 3840;
         height = 2160;
-        refresh = 119.999;
+        refresh = 240.016;
       };
     };
   };
