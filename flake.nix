@@ -11,6 +11,7 @@
     ];
   };
   inputs = {
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -45,6 +46,7 @@
       nur,
       catppuccin,
       niri,
+      nixos-hardware,
       ...
     }@inputs:
     let
@@ -70,7 +72,8 @@
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             ./hosts/${host}
-          ];
+          ]
+          ++ (if host == "jex" then [ nixos-hardware.nixosModules.dell-xps-13-9315 ] else [ ]);
           specialArgs = { inherit inputs; };
         };
       };
