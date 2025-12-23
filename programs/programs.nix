@@ -16,6 +16,8 @@
   ];
 
   home.packages = [
+    pkgs.nautilus
+    pkgs.r2modman
     pkgs.zed-editor
     pkgs.ripgrep
     pkgs.dragon-drop
