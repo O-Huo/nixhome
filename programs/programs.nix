@@ -1,4 +1,9 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  starship-jj,
+  ...
+}:
 {
   nixpkgs.config.allowUnfree = true;
 
@@ -16,6 +21,7 @@
   ];
 
   home.packages = [
+    starship-jj
     pkgs.nautilus
     pkgs.r2modman
     pkgs.zed-editor
