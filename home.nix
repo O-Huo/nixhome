@@ -1,10 +1,11 @@
-{ 
-  inputs
-, lib
-, pkgs
-, isLinux ? false
-, ...
-}: {
+{
+  inputs,
+  lib,
+  pkgs,
+  isLinux ? false,
+  ...
+}:
+{
   nixpkgs = {
     overlays = lib.optional isLinux inputs.niri.overlays.niri;
   };
