@@ -13,6 +13,13 @@
     ./shell
     ./programs/programs.nix
   ];
+  home.pointerCursor = lib.mkIf isLinux {
+    package = pkgs.nordic;
+    name = "Nordic-cursors";
+    size = 48;
+    gtk.enable = true;
+    x11.enable = true;
+  };
   home = {
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
