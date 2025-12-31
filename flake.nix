@@ -12,7 +12,8 @@
   };
   inputs = {
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixos.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -43,6 +44,7 @@
   };
   outputs =
     {
+      nixos,
       nixpkgs,
       home-manager,
       nixvim,
@@ -72,7 +74,7 @@
         "jex"
       ];
       mkHost = host: {
-        ${host} = nixpkgs.lib.nixosSystem {
+        ${host} = nixos.lib.nixosSystem {
           modules = [
             nur.modules.nixos.default
             vscode-server.nixosModules.default
@@ -119,7 +121,7 @@
     {
       packages = home-manager.packages;
 
-      nixosConfigurations = nixpkgs.lib.mergeAttrsList (map mkHost hosts);
+      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
       homeConfigurations = nixpkgs.lib.mergeAttrsList (map mkAccount accounts) // {
         "aoli@darwin" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsArm;
