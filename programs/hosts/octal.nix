@@ -1,4 +1,5 @@
-{ programs, ... }: {
+{ programs, ... }:
+{
   programs.noctalia-shell.settings.location = {
     name = "Pittsburgh, United States";
   };
@@ -7,15 +8,15 @@
   #   ";
   programs.niri.settings = {
     cursor = {
-        theme = "Nordic-cursors";
-        size = 48;
-      };
+      theme = "Nordic-cursors";
+      size = 48;
+    };
     outputs."DP-3" = {
       scale = 1.5;
       mode = {
         width = 3840;
         height = 2160;
-        refresh = 240.016;
+        refresh = 119.999;
       };
     };
   };
