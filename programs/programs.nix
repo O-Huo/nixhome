@@ -23,6 +23,7 @@
   home.packages = [
     starship-jj
     pkgs.zed-editor
+    pkgs.libreoffice
     pkgs.ripgrep
     pkgs.cachix
     pkgs.btop
