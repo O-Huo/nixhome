@@ -57,12 +57,13 @@ pkgs: with pkgs; {
       llvmPackages.bintools
       lldb
       cargo-fuzz
-      bpftrace
-      perf
       inferno
       cargo-flamegraph
       cargo
       protobuf
+    ] ++ lib.optionals stdenv.isLinux [
+      bpftrace
+      perf
     ];
   };
 

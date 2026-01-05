@@ -22,11 +22,8 @@
 
   home.packages = [
     starship-jj
-    pkgs.nautilus
-    pkgs.r2modman
     pkgs.zed-editor
     pkgs.ripgrep
-    pkgs.dragon-drop
     pkgs.cachix
     pkgs.btop
     pkgs.codex
@@ -94,6 +91,9 @@
     pkgs.seahorse
     pkgs.gnome-keyring
     pkgs.xdg-desktop-portal-gnome
+    pkgs.nautilus
+    pkgs.r2modman
+    pkgs.dragon-drop
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
     pkgs.alt-tab-macos

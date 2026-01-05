@@ -20,10 +20,10 @@ let
     ../mutable.nix
   ];
 
-  home.file = lib.genAttrs pathsToMakeWritable (_: {
-      force = true;
-      mutable = true;
-  });
+  # home.file = lib.genAttrs pathsToMakeWritable (_: {
+  #     force = true;
+  #     mutable = true;
+  # });
   programs.vscode = {
     enable = true;
     package = pkgs.vscode;
