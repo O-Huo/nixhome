@@ -11,6 +11,8 @@
       hour_format = "hour24";
       vim_mode = true;
       base_keymap = "JetBrains";
+      ui_font_size = 16;
+      buffer_font_size = 16;
     };
   };
 }
