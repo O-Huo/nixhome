@@ -22,6 +22,7 @@
 
   home.packages = [
     starship-jj
+    pkgs.google-chrome
     pkgs.zed-editor
     pkgs.libreoffice
     pkgs.ripgrep
