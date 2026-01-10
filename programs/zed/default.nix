@@ -13,6 +13,7 @@
       base_keymap = "JetBrains";
       ui_font_size = 16;
       buffer_font_size = 16;
+      auto_save = "on_focus_change";
     };
   };
 }
