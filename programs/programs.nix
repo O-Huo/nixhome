@@ -22,6 +22,7 @@
 
   home.packages = [
     starship-jj
+    pkgs.winboat
     pkgs.google-chrome
     pkgs.zed-editor
     pkgs.libreoffice
@@ -30,7 +31,6 @@
     pkgs.btop
     pkgs.codex
     pkgs.pciutils
-    pkgs.code-cursor
     pkgs.kitty
     pkgs.kitty-themes
     pkgs.claude-code
