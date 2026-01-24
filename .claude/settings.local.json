@@ -10,7 +10,10 @@
       "Bash(systemctl status:*)",
       "Read(//nix/store/**)",
       "Bash(cat:*)",
-      "Bash(uwsm:*)"
+      "Bash(uwsm:*)",
+      "mcp__acp__Bash",
+      "mcp__acp__Write",
+      "mcp__acp__Edit"
     ],
     "deny": []
   }

@@ -65,6 +65,7 @@
         "octal"
         "ruby"
         "jex"
+        "nixnas"
       ];
       mkHost = host: {
         ${host} = nixpkgs.lib.nixosSystem {
@@ -83,6 +84,7 @@
         "aoli@octal"
         "aoli@jex"
         "hao@linux"
+        "hao@nixnas"
       ];
       mkAccount =
         account:
