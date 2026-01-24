@@ -109,11 +109,16 @@
     mime.enable = pkgs.stdenv.isLinux;
     mimeApps = {
       enable = pkgs.stdenv.isLinux;
+      defaultApplications = {
+        "text/html" = "firefox.desktop";
+        "x-scheme-handler/http" = "firefox.desktop";
+        "x-scheme-handler/https" = "firefox.desktop";
+        "application/xhtml+xml" = "firefox.desktop";
+      };
     };
     portal = {
       enable = pkgs.stdenv.isLinux;
       extraPortals = [
-        pkgs.xdg-desktop-portal-gtk
         pkgs.xdg-desktop-portal-gnome
       ];
     };

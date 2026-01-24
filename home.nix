@@ -1,10 +1,11 @@
-{ 
-  inputs
-, lib
-, pkgs
-, isLinux ? false
-, ...
-}: {
+{
+  inputs,
+  lib,
+  pkgs,
+  isLinux ? false,
+  ...
+}:
+{
   nixpkgs = {
     overlays = lib.optional isLinux inputs.niri.overlays.niri;
   };
@@ -15,7 +16,7 @@
   home.pointerCursor = lib.mkIf isLinux {
     package = pkgs.nordic;
     name = "Nordic-cursors";
-    size = 48;
+    size = 36;
     gtk.enable = true;
     x11.enable = true;
   };

@@ -10,9 +10,7 @@
     ./dell-xps-9315-cam.nix
     ../common/aoli.nix
   ];
-  services.logind = {
-    lidSwitch = "suspend";
-  };
+  services.logind.settings.Login.HandleLidSwitch = "suspend";
   boot.kernelPackages = pkgs.linuxPackages_latest;
   services.thermald.enable = true;
   services.fwupd.enable = true;

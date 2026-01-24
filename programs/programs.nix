@@ -1,4 +1,9 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  starship-jj,
+  ...
+}:
 {
   nixpkgs.config.allowUnfree = true;
 
@@ -16,14 +21,16 @@
   ];
 
   home.packages = [
+    starship-jj
+    pkgs.winboat
+    pkgs.google-chrome
     pkgs.zed-editor
+    pkgs.libreoffice
     pkgs.ripgrep
-    pkgs.dragon-drop
     pkgs.cachix
     pkgs.btop
     pkgs.codex
     pkgs.pciutils
-    pkgs.code-cursor
     pkgs.kitty
     pkgs.kitty-themes
     pkgs.claude-code
@@ -86,6 +93,9 @@
     pkgs.seahorse
     pkgs.gnome-keyring
     pkgs.xdg-desktop-portal-gnome
+    pkgs.nautilus
+    pkgs.r2modman
+    pkgs.dragon-drop
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
     pkgs.alt-tab-macos

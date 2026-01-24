@@ -10,7 +10,7 @@
   };
 
   environment.systemPackages = with pkgs; [
-    inputs.noctalia.packages.${system}.default
+    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
   services.noctalia-shell.enable = true;
   environment.sessionVariables = {
@@ -24,7 +24,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${lib.makeBinPath [ pkgs.greetd.tuigreet ]}/tuigreet --time --remember --cmd ${pkgs.niri-unstable}/bin/niri-session";
+        command = "${lib.makeBinPath [ pkgs.tuigreet ]}/tuigreet --time --remember --cmd ${pkgs.niri-unstable}/bin/niri-session";
         user = "greeter";
       };
     };

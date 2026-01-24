@@ -1,11 +1,13 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{ pkgs
-, inputs
-, withNvidia ? false
-, ...
-}: {
+{
+  pkgs,
+  inputs,
+  withNvidia ? false,
+  ...
+}:
+{
   imports = [
     ./niri.nix
   ];
@@ -37,7 +39,7 @@
       "user" = {
         sliceConfig = {
           ManagedOOMMemoryPressure = "kill";
-          ManagedOOMMemoryPressureLimit = "30%"; 
+          ManagedOOMMemoryPressureLimit = "30%";
         };
       };
     };
@@ -123,13 +125,10 @@
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
 
-
   # https://wiki.nixos.org/wiki/NVIDIA
   hardware.graphics.enable = true;
-  services.xserver.videoDrivers =
-    if withNvidia
-      then [ "nvidia" ]
-    else [ ];
+  hardware.nvidia.package = pkgs.linuxPackages.nvidiaPackages.latest;
+  services.xserver.videoDrivers = if withNvidia then [ "nvidia" ] else [ ];
   hardware.nvidia.open = false;
   hardware.nvidia.modesetting.enable = withNvidia;
   boot.blacklistedKernelModules = pkgs.lib.optionals withNvidia [ "amdgpu" ];
@@ -190,7 +189,10 @@
   services.tailscale.enable = true;
   services.tailscale.useRoutingFeatures = "both";
 
-  nix.settings.experimental-features = pkgs.lib.mkForce [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = pkgs.lib.mkForce [
+    "nix-command"
+    "flakes"
+  ];
   nix.settings.substituters = [
     "https://nix-community.cachix.org"
     "https://cache.numtide.com"
@@ -202,7 +204,7 @@
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
   ];
   nix.optimise.automatic = true;
-  nix.optimise.dates = [ "03:45" ]; 
+  nix.optimise.dates = [ "03:45" ];
   nix.gc = {
     automatic = true;
     dates = "weekly";

@@ -12,6 +12,7 @@
   };
   inputs = {
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -36,9 +37,14 @@
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
+    starship-jj = {
+      url = "gitlab:lanastara_foss/starship-jj";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {
+      nixos,
       nixpkgs,
       home-manager,
       nixvim,
@@ -47,6 +53,7 @@
       catppuccin,
       niri,
       nixos-hardware,
+      starship-jj,
       ...
     }@inputs:
     let
@@ -68,7 +75,7 @@
         "nixnas"
       ];
       mkHost = host: {
-        ${host} = nixpkgs.lib.nixosSystem {
+        ${host} = nixos.lib.nixosSystem {
           modules = [
             nur.modules.nixos.default
             vscode-server.nixosModules.default
@@ -108,6 +115,7 @@
             extraSpecialArgs = {
               inherit inputs;
               isLinux = pkgsX86.stdenv.isLinux;
+              starship-jj = starship-jj.packages.x86_64-linux.default;
             };
           };
         };
@@ -115,7 +123,7 @@
     {
       packages = home-manager.packages;
 
-      nixosConfigurations = nixpkgs.lib.mergeAttrsList (map mkHost hosts);
+      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
       homeConfigurations = nixpkgs.lib.mergeAttrsList (map mkAccount accounts) // {
         "aoli@darwin" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsArm;
@@ -127,7 +135,8 @@
           ];
           extraSpecialArgs = {
             inherit inputs;
-            isLinux = pkgsArm.stdenv.isLinux;
+            isLinux = false;
+            starship-jj = starship-jj.packages.aarch64-darwin.default;
           };
         };
       };

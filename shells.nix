@@ -1,5 +1,4 @@
-pkgs:
-with pkgs; {
+pkgs: with pkgs; {
   default = mkShellNoCC {
     buildInputs = [
       nixfmt-rfc-style
@@ -11,14 +10,6 @@ with pkgs; {
       dotnetCorePackages.sdk_8_0_3xx
       jdk11
       maven
-    ];
-  };
-
-  java23 = mkShellNoCC {
-    buildInputs = [
-      jdk23
-      maven
-      gradle
     ];
   };
 
@@ -66,23 +57,22 @@ with pkgs; {
       llvmPackages.bintools
       lldb
       cargo-fuzz
-      bpftrace
-      perf
       inferno
       cargo-flamegraph
       cargo
       protobuf
+    ] ++ lib.optionals stdenv.isLinux [
+      bpftrace
+      perf
     ];
   };
 
-  clojure =
-    mkShellNoCC
-    {
-      buildInputs = [
-        leiningen
-        gnuplot
-        graphviz
-        jdk11
-      ];
-    };
+  clojure = mkShellNoCC {
+    buildInputs = [
+      leiningen
+      gnuplot
+      graphviz
+      jdk11
+    ];
+  };
 }

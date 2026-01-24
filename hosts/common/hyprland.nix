@@ -1,7 +1,7 @@
 {pkgs, lib, inputs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    inputs.noctalia.packages.${system}.default
+    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
   imports = [
     inputs.noctalia.nixosModules.default
@@ -22,7 +22,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${lib.makeBinPath [ pkgs.greetd.tuigreet ]}/tuigreet --time --remember --remember-session --sessions ${pkgs.hyprland}/share/wayland-sessions";
+        command = "${lib.makeBinPath [ pkgs.tuigreet ]}/tuigreet --time --remember --remember-session --sessions ${pkgs.hyprland}/share/wayland-sessions";
         user = "greeter";
       };
     };
