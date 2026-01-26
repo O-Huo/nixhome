@@ -22,10 +22,8 @@
 
   home.packages = [
     starship-jj
-    pkgs.winboat
     pkgs.google-chrome
     pkgs.zed-editor
-    pkgs.libreoffice
     pkgs.ripgrep
     pkgs.cachix
     pkgs.btop
@@ -89,6 +87,8 @@
     })
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
+    pkgs.libreoffice
+    pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
