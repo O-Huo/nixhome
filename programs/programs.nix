@@ -22,6 +22,7 @@
 
   home.packages = [
     starship-jj
+    pkgs.nix-output-monitor
     pkgs.google-chrome
     pkgs.zed-editor
     pkgs.ripgrep

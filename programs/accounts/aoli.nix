@@ -7,7 +7,8 @@
     homeDirectory = if (pkgs.stdenv.isDarwin) then "/Users/aoli" else "/home/aoli";
   };
   home.packages = with pkgs; [
-    (if pkgs.stdenv.isDarwin then jetbrains.idea else jetbrains.idea-oss)
+    jetbrains.idea
+    visualvm
   ];
 
   programs.git = {
