@@ -23,6 +23,7 @@
   home.packages = [
     starship-jj
     pkgs.nix-output-monitor
+    pkgs.qemu
     pkgs.google-chrome
     pkgs.zed-editor
     pkgs.ripgrep
