@@ -8,6 +8,13 @@
       "latex"
     ];
     userSettings = {
+      lsp = {
+        rust-analyzer = {
+          binary = {
+            path_lookup = true;
+          };
+        };
+      };
       hour_format = "hour24";
       vim_mode = true;
       base_keymap = "JetBrains";
