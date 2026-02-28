@@ -5,10 +5,6 @@
       "https://nix-community.cachix.org"
       "https://niri.cachix.org"
     ];
-    extra-trusted-public-keys = [
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
-    ];
   };
   inputs = {
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -28,7 +24,6 @@
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell"; # Use same quickshell version
     };
     niri = {
       url = "github:sodiboo/niri-flake";

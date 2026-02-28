@@ -1,7 +1,7 @@
 pkgs: with pkgs; {
   default = mkShellNoCC {
     buildInputs = [
-      nixfmt-rfc-style
+      nixfmt
     ];
   };
 
@@ -53,7 +53,8 @@ pkgs: with pkgs; {
       cargo-flamegraph
       cargo
       protobuf
-    ] ++ lib.optionals stdenv.isLinux [
+    ]
+    ++ lib.optionals stdenv.isLinux [
       bpftrace
       perf
     ];

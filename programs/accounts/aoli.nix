@@ -14,8 +14,10 @@
 
   programs.git = {
     enable = true;
-    userName = "aoli-al";
-    userEmail = "aoli.al@hotmail.com";
+    settings.user = {
+      name = "aoli-al";
+      email = "aoli.al@hotmail.com";
+    };
   };
 
   programs.jujutsu = {

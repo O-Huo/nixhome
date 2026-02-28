@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.nixvim = {
     plugins = {
       lspkind.enable = true; # Icons for CMP
@@ -82,7 +83,7 @@
     alejandra
     nixpkgs-fmt
     prettierd
-    nixfmt-classic
+    nixfmt
     stylua
     vimPlugins.luasnip
   ];
