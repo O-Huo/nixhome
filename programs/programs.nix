@@ -89,7 +89,6 @@
     })
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
-    pkgs.libreoffice
     pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse
