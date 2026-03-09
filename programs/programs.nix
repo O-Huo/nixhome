@@ -97,6 +97,7 @@
     pkgs.nautilus
     pkgs.r2modman
     pkgs.dragon-drop
+    pkgs.rr
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
     pkgs.alt-tab-macos
