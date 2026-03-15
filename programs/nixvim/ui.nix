@@ -45,7 +45,7 @@
       settings.filetypes = [ "css" "scss" ];
     };
 
-    image.enable = true; # image support
+    image.enable = false; # disabled: causes errors in non-standard terminals (e.g. jjui)
 
     illuminate = {
       enable = true; # Used to illuminate same words
