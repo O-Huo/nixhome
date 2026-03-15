@@ -88,7 +88,7 @@
         pinnedExecs = [ ];
         useApp2Unit = false;
         sortByMostUsed = true;
-        terminalCommand = "xterm -e";
+        terminalCommand = "alacritty -e";
       };
     };
   };
@@ -158,7 +158,7 @@
     settings = {
       window-rules = [
         {
-          matches = [{ app-id = "^kitty-yazi$"; }];
+          matches = [{ app-id = "^alacritty-yazi$"; }];
           open-floating = true;
         }
       ];

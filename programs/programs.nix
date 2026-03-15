@@ -15,7 +15,7 @@
     ./atuin
     ./starship
     ./tmux
-    ./kitty
+    ./alacritty
     ./yazi
     ./zed
   ];
@@ -31,8 +31,7 @@
     pkgs.btop
     pkgs.codex
     pkgs.pciutils
-    pkgs.kitty
-    pkgs.kitty-themes
+    pkgs.alacritty
     pkgs.claude-code
     pkgs.nix-index
     pkgs.killall

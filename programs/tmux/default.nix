@@ -1,4 +1,10 @@
-{ pkgs, lib, inputs, ... }: {
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
+{
   home.packages = with pkgs; [
     tmux
   ];
@@ -10,6 +16,9 @@
     baseIndex = 1;
     mouse = true;
     keyMode = "vi";
+    plugins = with pkgs.tmuxPlugins; [
+      prefix-highlight
+    ];
     extraConfig = ''
       set -gq allow-passthrough on
       set -g visual-activity off
@@ -18,7 +27,7 @@
       set -s escape-time 0
       set-option -g default-shell ${pkgs.fish}/bin/fish
       set-option -g default-command ${pkgs.fish}/bin/fish
-      
+
       # Visual mode key bindings
       bind-key -T copy-mode-vi v send-keys -X begin-selection
       bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle

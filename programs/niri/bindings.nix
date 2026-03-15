@@ -16,7 +16,7 @@
       "Mod+Shift+Slash".action.show-hotkey-overlay = { };
 
       # Suggested binds for running programs: terminal, app launcher, screen locker.
-      "Mod+T".action.spawn = "kitty";
+      "Mod+T".action.spawn = "alacritty";
       "Mod+D".action.spawn = [
         "noctalia-shell"
         "ipc"
@@ -25,9 +25,9 @@
         "toggle"
       ];
       "Mod+Y".action.spawn = [
-        "kitty"
+        "alacritty"
         "--class"
-        "kitty-yazi"
+        "alacritty-yazi"
         "-e"
         "yazi"
       ];
