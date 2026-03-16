@@ -13,6 +13,7 @@
     };
     ignores = [
       ".venv/"
+      ".envrc"
       ".direnv/"
       "*.swp"
       "*.swo"
