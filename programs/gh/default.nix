@@ -10,6 +10,7 @@
     lfs.enable = true;
     settings = {
       pull.rebase = false;
+      core.autocrlf = true;
     };
     ignores = [
       ".venv/"
