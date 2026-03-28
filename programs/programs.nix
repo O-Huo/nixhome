@@ -14,7 +14,7 @@
     ./browserpass
     ./atuin
     ./starship
-    ./tmux
+    ./zellij
     ./alacritty
     ./yazi
     ./zed
@@ -57,7 +57,6 @@
     pkgs.git
     pkgs.git-lfs
     pkgs.obsidian
-    pkgs.byobu
     pkgs.htop
     pkgs.nerd-fonts.fira-code
     pkgs.fira-code
@@ -88,7 +87,7 @@
     })
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
-    pkgs.winboat
+    # pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
