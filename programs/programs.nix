@@ -32,7 +32,7 @@
     pkgs.codex
     pkgs.pciutils
     pkgs.alacritty
-    pkgs.claude-code
+    # pkgs.claude-code
     pkgs.nix-index
     pkgs.killall
     pkgs.dive
