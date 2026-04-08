@@ -22,6 +22,7 @@
       buffer_font_size = 16;
       auto_save = "on_focus_change";
       format_on_save = "off";
+      soft_wrap = "editor_width";
     };
   };
 }

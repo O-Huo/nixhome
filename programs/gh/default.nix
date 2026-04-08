@@ -10,7 +10,6 @@
     lfs.enable = true;
     settings = {
       pull.rebase = false;
-      core.autocrlf = true;
     };
     ignores = [
       ".venv/"
@@ -35,6 +34,7 @@
       "server exited unexpectedly"
       ".claude/"
       "settings.local.json"
+      ".codex"
     ];
   };
   programs.jujutsu = {
