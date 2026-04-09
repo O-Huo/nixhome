@@ -22,6 +22,8 @@
 
   home.packages = [
     starship-jj
+    pkgs.thunderbird
+    pkgs.awscli2
     pkgs.nix-output-monitor
     pkgs.qemu
     pkgs.google-chrome
