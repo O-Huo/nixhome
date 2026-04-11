@@ -89,7 +89,7 @@
     })
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
-    # pkgs.winboat
+    pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
