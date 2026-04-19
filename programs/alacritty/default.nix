@@ -17,6 +17,7 @@
         x = 0;
         y = 0;
       };
+      window.option_as_alt = "OnlyLeft";
     };
   };
 }
