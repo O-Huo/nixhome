@@ -36,6 +36,7 @@
     pkgs.alacritty
     # pkgs.claude-code
     pkgs.nix-index
+    pkgs.nixd
     pkgs.killall
     pkgs.dive
     pkgs.podman-tui
