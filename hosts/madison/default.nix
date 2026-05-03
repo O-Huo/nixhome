@@ -1,4 +1,4 @@
-{pkgs, inputs, ...}: {
+{pkgs, lib, inputs, ...}: {
   imports = [
     (import ../common {
       inherit pkgs inputs;
@@ -13,12 +13,30 @@
   # Intel Arc Pro B70 (Battlemage G31) — uses the `xe` kernel driver
   hardware.enableRedistributableFirmware = true;
   boot.initrd.kernelModules = [ "xe" ];
+  hardware.graphics.enable32Bit = true;
   hardware.graphics.extraPackages = with pkgs; [
     intel-media-driver
     vpl-gpu-rt
     intel-compute-runtime
   ];
+  hardware.graphics.extraPackages32 = with pkgs.pkgsi686Linux; [
+    intel-media-driver
+  ];
   environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
+
+  programs.steam = {
+    enable = lib.mkForce true;
+    package = pkgs.steam.override {
+      # Steam's CEF web UI currently fails to present reliably on Intel BMG
+      # under this Wayland/Niri session. Keep games on normal Mesa/Vulkan, but
+      # render Steam's web views in software.
+      extraArgs = "-cef-disable-gpu";
+      extraEnv = {
+        NIXOS_OZONE_WL = "0";
+        ELECTRON_OZONE_PLATFORM_HINT = "x11";
+      };
+    };
+  };
 
   # Mount additional data disks at boot
   fileSystems."/mnt/slow-ssd" = {
