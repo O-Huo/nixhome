@@ -2,7 +2,7 @@
   imports = [
     (import ../common {
       inherit pkgs inputs;
-      withNvidia = true;
+      withNvidia = false;
     })
     ../common/hao.nix
     ./hardware-configuration.nix
@@ -10,6 +10,15 @@
   networking.hostName = "xiangpeng-madison";
   time.timeZone = "America/Chicago";
 
+  # Intel Arc Pro B70 (Battlemage G31) — uses the `xe` kernel driver
+  hardware.enableRedistributableFirmware = true;
+  boot.initrd.kernelModules = [ "xe" ];
+  hardware.graphics.extraPackages = with pkgs; [
+    intel-media-driver
+    vpl-gpu-rt
+    intel-compute-runtime
+  ];
+  environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
 
   # Mount additional data disks at boot
   fileSystems."/mnt/slow-ssd" = {
