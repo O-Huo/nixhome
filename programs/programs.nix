@@ -55,7 +55,7 @@
     pkgs.cloc
     pkgs.fastfetch
     pkgs.vscode
-    pkgs.discord
+    pkgs.vesktop
     pkgs.gh
     pkgs.git
     pkgs.git-lfs
