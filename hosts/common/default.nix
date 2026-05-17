@@ -14,6 +14,7 @@
 
   boot.kernel.sysctl."kernel.yama.ptrace_scope" = 0;
   virtualisation.containers.enable = true;
+  virtualisation.libvirtd.enable = true;
   virtualisation = {
     podman = {
       enable = true;

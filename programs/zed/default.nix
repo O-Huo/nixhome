@@ -15,6 +15,22 @@
       autosave = "on_focus_change";
       format_on_save = "off";
       soft_wrap = "editor_width";
+      lsp = {
+        texlab = {
+          build = {
+            onSave = true;
+            forwardSearchAfter = true;
+          };
+          forwardSearch = {
+            executable = "okular";
+            args = [
+              "--unique"
+              "--noraise"
+              "file:%p#src:%l %f"
+            ];
+          };
+        };
+      };
     };
   };
 }

@@ -36,6 +36,7 @@
     pkgs.alacritty
     # pkgs.claude-code
     pkgs.nix-index
+    pkgs.kdePackages.okular
     pkgs.nixd
     pkgs.killall
     pkgs.dive

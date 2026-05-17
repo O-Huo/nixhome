@@ -12,6 +12,7 @@
       "podman"
       "networkmanager"
       "wheel"
+      "libvirtd"
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFDOWYrrl2qfy3wQlkPvtydLozCa3yCe8Tn3MQ/VL27e"
