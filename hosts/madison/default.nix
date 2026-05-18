@@ -64,7 +64,7 @@
   virtualisation.oci-containers = {
     backend = "podman";
     containers.llama-server = {
-      image = "ghcr.io/ggml-org/llama.cpp:server-intel-b9010";
+      image = "ghcr.io/ggml-org/llama.cpp:server-intel";
       autoStart = true;
       ports = [ "8080:8080" ];
       # Writable cache for `-hf` model downloads.
