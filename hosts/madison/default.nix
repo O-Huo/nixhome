@@ -65,6 +65,7 @@
     backend = "podman";
     containers.llama-server = {
       image = "ghcr.io/ggml-org/llama.cpp:server-intel";
+      pull = "newer";
       autoStart = true;
       ports = [ "8080:8080" ];
       # Writable cache for `-hf` model downloads.
@@ -89,10 +90,6 @@
         "--cache-type-k" "q8_0"
         "--cache-type-v" "q8_0"
         "-fa" "on"
-        # MTP currently requires a single server slot and no mmproj.
-        "-np" "1"
-        "--spec-type" "draft-mtp"
-        "--spec-draft-n-max" "2"
       ];
       extraOptions = [
         "--device=/dev/dri"
