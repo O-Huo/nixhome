@@ -74,7 +74,7 @@
         ONEAPI_DEVICE_SELECTOR = "level_zero:0";
       };
       cmd = [
-        "-m" "/root/.cache/llama.cpp/Qwen3.6-27B-UD-Q4_K_XL.gguf"
+        "-m" "/root/.cache/llama.cpp/Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf"
         "-ngl" "99"
         "--host" "0.0.0.0"
         "--port" "8080"
@@ -89,6 +89,10 @@
         "--cache-type-k" "q8_0"
         "--cache-type-v" "q8_0"
         "-fa" "on"
+        # MTP currently requires a single server slot and no mmproj.
+        "-np" "1"
+        "--spec-type" "draft-mtp"
+        "--spec-draft-n-max" "2"
       ];
       extraOptions = [
         "--device=/dev/dri"
