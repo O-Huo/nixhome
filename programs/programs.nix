@@ -67,6 +67,7 @@
     pkgs.fira-code-symbols
     pkgs.slack
     pkgs.signal-desktop
+    pkgs.nh
     (pkgs.python3.withPackages (
       ps: with ps; [
         numpy
