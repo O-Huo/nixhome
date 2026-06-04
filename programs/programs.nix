@@ -36,7 +36,6 @@
     pkgs.alacritty
     # pkgs.claude-code
     pkgs.nix-index
-    pkgs.kdePackages.okular
     pkgs.nixd
     pkgs.killall
     pkgs.dive
@@ -102,8 +101,8 @@
     pkgs.r2modman
     pkgs.dragon-drop
     pkgs.rr
+    pkgs.kdePackages.okular
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
-    pkgs.alt-tab-macos
   ];
 }
