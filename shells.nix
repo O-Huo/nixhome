@@ -8,12 +8,14 @@ pkgs: with pkgs; {
   java21 = mkShellNoCC {
     buildInputs = [
       jdk21
+      maven
     ];
   };
 
   java17 = mkShellNoCC {
     buildInputs = [
       jdk17
+      maven
     ];
   };
 
