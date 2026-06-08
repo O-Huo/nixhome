@@ -1,7 +1,4 @@
 { programs, ... }: {
-  programs.noctalia-shell.settings.location = {
-    name = "Pittsburgh, United States";
-  };
   programs.niri.settings = {
     cursor = {
         theme = "Nordic-cursors";

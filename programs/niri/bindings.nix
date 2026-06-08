@@ -18,11 +18,10 @@
       # Suggested binds for running programs: terminal, app launcher, screen locker.
       "Mod+T".action.spawn = "alacritty";
       "Mod+D".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "launcher"
-        "toggle"
       ];
       "Mod+Y".action.spawn = [
         "alacritty"
@@ -32,10 +31,9 @@
         "yazi"
       ];
       "Super+Ctrl+Q".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
-        "lockScreen"
+        "noctalia"
+        "msg"
+        "session"
         "lock"
       ];
       "Super+Ctrl+S".action.spawn = [
