@@ -65,8 +65,6 @@
         "pittsburgh"
         "madison"
         "octal"
-        "ruby"
-        "jex"
         "nixnas"
       ];
       mkHost = host: {
@@ -75,16 +73,13 @@
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             ./hosts/${host}
-          ]
-          ++ (if host == "jex" then [ nixos-hardware.nixosModules.dell-xps-13-9315 ] else [ ]);
+          ];
           specialArgs = { inherit inputs; };
         };
       };
 
       accounts = [
-        "aoli@ruby"
         "aoli@octal"
-        "aoli@jex"
         "hao@linux"
         "hao@nixnas"
       ];

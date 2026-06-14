@@ -22,6 +22,7 @@
 
   home.packages = [
     starship-jj
+    pkgs.yubikey-manager
     pkgs.thunderbird
     pkgs.awscli2
     pkgs.nix-output-monitor

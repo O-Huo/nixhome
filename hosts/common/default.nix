@@ -136,6 +136,7 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
   services.colord.enable = true;
+  services.pcscd.enable = true;
 
   programs.steam = {
     enable = withNvidia;
