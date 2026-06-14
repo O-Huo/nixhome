@@ -12,6 +12,7 @@
       dock = {
         enabled = true;
         auto_hide = true;
+        reserve_space = false;
       };
       bar = {
         density = "compact";
