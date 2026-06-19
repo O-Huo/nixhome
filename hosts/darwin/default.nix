@@ -4,6 +4,17 @@
   system.stateVersion = 6;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfree = true;
+
+  # GUI apps are installed at the system level so nix-darwin creates proper
+  # /Applications/Nix Apps aliases that Spotlight and Launchpad can index.
+  environment.systemPackages =
+    (import ../../programs/gui-apps.nix pkgs)
+    ++ (with pkgs; [
+      jetbrains.idea
+      jetbrains.rust-rover
+      visualvm
+    ]);
 
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";

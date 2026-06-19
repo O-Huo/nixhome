@@ -24,11 +24,9 @@
     starship-jj
     pkgs.gnupg
     pkgs.yubikey-manager
-    pkgs.thunderbird
     pkgs.awscli2
     pkgs.nix-output-monitor
     pkgs.qemu
-    pkgs.google-chrome
     pkgs.zed-editor
     pkgs.ripgrep
     pkgs.cachix
@@ -48,8 +46,6 @@
     pkgs.starship
     pkgs.git-remote-hg
     pkgs.unzip
-    pkgs.firefox
-    pkgs.qtpass
     pkgs.fish
     pkgs.browserpass
     pkgs.pass
@@ -57,17 +53,13 @@
     pkgs.cloc
     pkgs.fastfetch
     pkgs.vscode
-    pkgs.vesktop
     pkgs.gh
     pkgs.git
     pkgs.git-lfs
-    pkgs.obsidian
     pkgs.htop
     pkgs.nerd-fonts.fira-code
     pkgs.fira-code
     pkgs.fira-code-symbols
-    pkgs.slack
-    pkgs.signal-desktop
     pkgs.nh
     (pkgs.python3.withPackages (
       ps: with ps; [
@@ -80,7 +72,6 @@
     ))
     pkgs.texliveFull
     pkgs.wget
-    pkgs.telegram-desktop
     pkgs.atuin
     (pkgs.symlinkJoin {
       name = config.home.username;
@@ -93,6 +84,7 @@
       ];
     })
   ]
+  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) (import ./gui-apps.nix pkgs)
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
     pkgs.winboat
     pkgs.gnupg
