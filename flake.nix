@@ -14,6 +14,10 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixvim = {
       url = "github:nix-community/nixvim";
     };
@@ -42,6 +46,7 @@
       nixos,
       nixpkgs,
       home-manager,
+      nix-darwin,
       nixvim,
       vscode-server,
       nur,
@@ -114,6 +119,15 @@
       packages = home-manager.packages;
 
       nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
+
+      darwinConfigurations."Aos-MacBook-Air" = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
+        modules = [
+          ./hosts/darwin
+        ];
+        specialArgs = { inherit inputs; };
+      };
+
       homeConfigurations = nixpkgs.lib.mergeAttrsList (map mkAccount accounts) // {
         "aoli@darwin" = home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsArm;

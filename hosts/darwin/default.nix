@@ -1,0 +1,25 @@
+{ pkgs, ... }: {
+  # Used for backwards compatibility. Read the changelog before changing.
+  # $ darwin-rebuild changelog
+  system.stateVersion = 6;
+
+  nixpkgs.hostPlatform = "aarch64-darwin";
+
+  # Necessary for using flakes on this system.
+  nix.settings.experimental-features = "nix-command flakes";
+
+  # The platform the configuration will be used on.
+  system.primaryUser = "aoli";
+
+  # Map Caps Lock to Left Control.
+  system.keyboard = {
+    enableKeyMapping = true;
+    remapCapsLockToControl = true;
+  };
+
+  # Use F1, F2, etc. as standard function keys (no need to hold Fn).
+  system.defaults.NSGlobalDomain."com.apple.keyboard.fnState" = true;
+
+  # Automatically hide and show the Dock.
+  system.defaults.dock.autohide = true;
+}

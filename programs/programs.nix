@@ -22,6 +22,7 @@
 
   home.packages = [
     starship-jj
+    pkgs.gnupg
     pkgs.yubikey-manager
     pkgs.thunderbird
     pkgs.awscli2
