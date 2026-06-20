@@ -33,4 +33,11 @@
 
   # Automatically hide and show the Dock.
   system.defaults.dock.autohide = true;
+
+  # Tap to click on the trackpad (no need to physically press).
+  system.defaults.trackpad.Clicking = true;
+  system.defaults.NSGlobalDomain."com.apple.mouse.tapBehavior" = 1;
+
+  # Three-finger drag.
+  system.defaults.trackpad.TrackpadThreeFingerDrag = true;
 }
