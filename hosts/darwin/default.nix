@@ -19,6 +19,9 @@
   # Necessary for using flakes on this system.
   nix.settings.experimental-features = "nix-command flakes";
 
+  # Tailscale VPN: installs the package and runs the tailscaled daemon.
+  services.tailscale.enable = true;
+
   # The platform the configuration will be used on.
   system.primaryUser = "aoli";
 
