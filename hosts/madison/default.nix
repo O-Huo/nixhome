@@ -5,6 +5,7 @@
       withNvidia = false;
     })
     ../common/hao.nix
+    ../common/aoli.nix
     ./hardware-configuration.nix
   ];
   networking.hostName = "xiangpeng-madison";

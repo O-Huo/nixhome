@@ -7,7 +7,6 @@
     isNormalUser = true;
     description = "Ao Li";
     shell = pkgs.fish;
-    uid = 1000;
     extraGroups = [
       "podman"
       "networkmanager"
