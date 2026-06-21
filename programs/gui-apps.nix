@@ -12,4 +12,5 @@ pkgs: with pkgs; [
   slack
   signal-desktop
   telegram-desktop
+  zoom-us
 ]
