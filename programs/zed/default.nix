@@ -9,6 +9,9 @@
     ];
     userSettings = {
       vim_mode = true;
+      vim = {
+        use_system_clipboard = "on_yank";
+      };
       base_keymap = "JetBrains";
       ui_font_size = 16;
       buffer_font_size = 16;
