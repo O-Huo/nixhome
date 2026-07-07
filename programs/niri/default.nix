@@ -1,4 +1,21 @@
-{ pkgs, lib, inputs, config, ... }: {
+{ pkgs, lib, inputs, config, ... }:
+let
+  mouse-inhibit = pkgs.writeShellScriptBin "mouse-inhibit" ''
+    for dev in /sys/class/input/input*; do
+      ${pkgs.systemd}/bin/udevadm info -q property -p "$dev" 2>/dev/null \
+        | ${pkgs.gnugrep}/bin/grep -qx 'ID_INPUT_MOUSE=1' || continue
+      echo "$1" > "$dev/inhibited" || true
+    done
+  '';
+  screen-off = pkgs.writeShellScript "screen-off" ''
+    ${lib.getExe pkgs.niri-unstable} msg action power-off-monitors
+    ${lib.getExe mouse-inhibit} 1
+  '';
+  screen-on = pkgs.writeShellScript "screen-on" ''
+    ${lib.getExe mouse-inhibit} 0
+    ${lib.getExe pkgs.niri-unstable} msg action power-on-monitors
+  '';
+in {
   imports = [
     inputs.noctalia.homeModules.default
     ./bindings.nix
@@ -29,10 +46,26 @@
         fill_mode = "crop";
         fill_color = "#000000";
       };
+      idle = {
+        behavior = {
+          lock = {
+            enabled = true;
+            timeout = 120;  # Reduce screen lock timeout for battery saving
+            action = "lock";
+          };
+          screen-off = {
+            enabled = true;
+            timeout = 150;  # Turn off display sooner
+            action = "command";
+            command = "${screen-off}";
+            resume_command = "${screen-on}";
+          };
+        };
+      };
     };
   };
   home.packages = with pkgs; [
-    hypridle
+    mouse-inhibit
     grim
     slurp
     wl-clipboard
@@ -53,6 +86,7 @@
         "x-scheme-handler/http" = "firefox.desktop";
         "x-scheme-handler/https" = "firefox.desktop";
         "application/xhtml+xml" = "firefox.desktop";
+        "application/pdf" = "firefox.desktop";
       };
     };
     portal = {
@@ -60,32 +94,6 @@
       extraPortals = [
         pkgs.xdg-desktop-portal-gnome
       ];
-    };
-  };
-
-
-  services = {
-    hypridle = {
-      enable = pkgs.stdenv.isLinux;
-      settings = {
-        general = {
-          after_sleep_cmd = "${lib.getExe pkgs.niri-unstable} msg action power-off-monitors";
-          before_sleep_cmd = "noctalia msg session lock";
-          ignore_dbus_inhibit = false;
-          lock_cmd = "noctalia msg session lock";
-        };
-        listener = [
-          {
-            timeout = 120;  # Reduce screen lock timeout for battery saving
-            on-timeout = "noctalia msg session lock";
-          }
-          {
-            timeout = 150;  # Turn off display sooner
-            on-timeout = "${lib.getExe pkgs.niri-unstable} msg action power-off-monitors";
-            on-resume = "${lib.getExe pkgs.niri-unstable} msg action power-on-monitors";
-          }
-        ];
-      };
     };
   };
 
