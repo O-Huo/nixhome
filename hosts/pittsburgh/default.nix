@@ -8,7 +8,6 @@
     ./hardware-configuration.nix
   ];
   networking.hostName = "xiangpeng-pittsburgh";
-  time.timeZone = "America/New_York";
 
   # GitHub Actions Runner
   services.github-runners.pittsburgh = {

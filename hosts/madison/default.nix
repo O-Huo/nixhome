@@ -9,7 +9,6 @@
     ./hardware-configuration.nix
   ];
   networking.hostName = "xiangpeng-madison";
-  time.timeZone = "America/Chicago";
 
   # Intel Arc Pro B70 (Battlemage G31) — uses the `xe` kernel driver
   hardware.enableRedistributableFirmware = true;
