@@ -10,6 +10,7 @@
   # /Applications/Nix Apps aliases that Spotlight and Launchpad can index.
   environment.systemPackages =
     (import ../../programs/gui-apps.nix pkgs)
+    ++ [ (import ../../programs/thunderbird/package.nix pkgs) ]
     ++ (with pkgs; [
       jetbrains.idea
       jetbrains.rust-rover

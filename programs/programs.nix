@@ -18,6 +18,7 @@
     ./alacritty
     ./yazi
     ./zed
+    ./thunderbird
   ];
 
   home.packages = [
