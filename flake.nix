@@ -70,6 +70,7 @@
         "pittsburgh"
         "madison"
         "octal"
+        "ruby"
         "nixnas"
       ];
       mkHost = host: {
@@ -85,6 +86,7 @@
 
       accounts = [
         "aoli@octal"
+        "aoli@ruby"
         "hao@linux"
         "hao@nixnas"
       ];
