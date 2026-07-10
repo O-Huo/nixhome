@@ -12,6 +12,7 @@
     ./niri.nix
   ];
 
+  boot.kernelPackages = pkgs.linuxPackages_7_1;
   boot.kernel.sysctl."kernel.yama.ptrace_scope" = 0;
   virtualisation.containers.enable = true;
   virtualisation.libvirtd.enable = true;

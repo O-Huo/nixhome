@@ -8,42 +8,37 @@
     ../common/aoli.nix
   ];
 
-  boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
+ boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
-
-  # PSR wake-up latency makes the 120 Hz eDP panel feel laggy.
-  boot.kernelParams = [
-    "xe.enable_psr=0"
-    "xe.enable_panel_replay=0"
-  ];
 
   boot.initrd.systemd.enable = true;
 
-  # MIPI camera (OV08X40 behind the Panther Lake IPU7). Needs the
-  # out-of-tree intel_cvs driver, and the USBIO stack must be up before
-  # the IPU7 probes or the sensor never enumerates.
   boot.extraModulePackages = [
     (config.boot.kernelPackages.callPackage ./intel-cvs.nix { })
+    (config.boot.kernelPackages.callPackage ./ipu-bridge.nix { })
   ];
   boot.extraModprobeConfig = ''
     softdep intel_ipu7 pre: usbio gpio_usbio i2c_usbio intel_cvs intel_skl_int3472_discrete
   '';
 
-  # The MIPI camera is only reachable through libcamera/PipeWire, but Zoom
-  # (and other V4L2-only apps) can't use that. Relay the libcamera feed into
-  # a v4l2loopback device they can open. The relay only grabs the sensor
-  # while a client has the loopback device open.
+  # The ov08x40's 2-lane binned mode (1928x1088) is broken on IPU7: every
+  # frame completes with INSYS_MSG_ERR_CAPTURE_HW_ERR_BAD_FRAME_DIM and the
+  # stream crawls at 3.6 fps. The full-res mode streams clean at 28.6 fps,
+  # so capture at 4K (full sensor mode, full FoV) and downscale on the CPU.
+  # The leaky queue drops frames instead of building latency when the
+  # scale/convert stage falls behind.
   services.v4l2-relayd.instances.mipi-camera = {
     enable = true;
     cardLabel = "Built-in Front Camera";
     extraPackages = [ pkgs.libcamera ];
-    input.pipeline = "libcamerasrc ! videoconvert ! videoscale ! videorate";
+    input.pipeline = "libcamerasrc ! video/x-raw,width=3840,height=2160 ! queue max-size-buffers=2 leaky=downstream ! videoscale ! video/x-raw,width=1280,height=720 ! videoconvert n-threads=4 ! video/x-raw,format=YUY2 ! videorate";
   };
 
   # Swap Alt/Super and make Caps Lock an extra Ctrl.
   services.kanata = {
     enable = true;
     keyboards.internal = {
+      devices = [ "/dev/input/by-path/platform-i8042-serio-0-event-kbd" ];
       config = ''
         (defsrc
           caps lalt lmet

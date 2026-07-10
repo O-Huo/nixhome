@@ -1,0 +1,20 @@
+Add the XPS 14 DA14260 to the upside-down sensor quirk list. Its OV08X40
+module is mounted rotated 180 degrees but the BIOS reports 0 in the SSDB,
+so libcamera never flips the image.
+
+--- a/ipu-bridge.c
++++ b/ipu-bridge.c
+@@ -134,5 +134,12 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
+ 		},
+ 		.driver_data = "OVTI02C1",
+ 	},
++	{
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Dell Inc."),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "XPS 14 DA14260"),
++		},
++		.driver_data = "OVTI08F4",
++	},
+ 	{} /* Terminating entry */
+ };
+

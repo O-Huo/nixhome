@@ -104,6 +104,9 @@ in {
     package = pkgs.niri-unstable;
 
     settings = {
+      input.touchpad = {
+        dwt = true;
+      };
       window-rules = [
         {
           matches = [{ app-id = "^alacritty-yazi$"; }];
