@@ -107,6 +107,9 @@ in {
       input.touchpad = {
         dwt = true;
       };
+      switch-events = {
+        lid-close.action.spawn = ["noctalia" "msg" "session" "lock"];
+      };
       window-rules = [
         {
           matches = [{ app-id = "^alacritty-yazi$"; }];
