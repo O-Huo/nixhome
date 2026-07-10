@@ -128,7 +128,7 @@
 
   # https://wiki.nixos.org/wiki/NVIDIA
   hardware.graphics.enable = true;
-  hardware.nvidia.package = pkgs.linuxPackages.nvidiaPackages.latest;
+  hardware.nvidia.package = pkgs.linuxPackages_7_1.nvidiaPackages.latest;
   services.xserver.videoDrivers = if withNvidia then [ "nvidia" ] else [ ];
   hardware.nvidia.open = false;
   hardware.nvidia.modesetting.enable = withNvidia;
