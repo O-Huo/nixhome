@@ -7,7 +7,9 @@
     ];
   };
   inputs = {
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    # TODO: revert to NixOS/nixos-hardware/master once PR #1912 (Dell XPS 14
+    # DA14260 / Panther Lake) is merged.
+    nixos-hardware.url = "github:cooparo/nixos-hardware/dell-xps-14-da14260";
     nixos.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {

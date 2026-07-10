@@ -4,6 +4,7 @@
       inherit pkgs inputs;
       withNvidia = false;
     })
+    inputs.nixos-hardware.nixosModules.dell-xps-14-da14260
     ./hardware-configuration.nix
     ../common/aoli.nix
   ];
@@ -12,14 +13,6 @@
   networking.hostName = "ruby";
 
   boot.initrd.systemd.enable = true;
-
-  boot.extraModulePackages = [
-    (config.boot.kernelPackages.callPackage ./intel-cvs.nix { })
-  ];
-  boot.extraModprobeConfig = ''
-    softdep intel_ipu7 pre: usbio gpio_usbio i2c_usbio intel_cvs intel_skl_int3472_discrete
-    blacklist intel_ipu7_psys
-  '';
 
 
   # Swap Alt/Super and make Caps Lock an extra Ctrl.

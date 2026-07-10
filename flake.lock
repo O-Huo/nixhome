@@ -242,16 +242,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1783692676,
-        "narHash": "sha256-6FXlRphexzMo3HpoN0NxEl7uQoE8llWeNJrD8NMA/CY=",
-        "owner": "NixOS",
+        "lastModified": 1781606227,
+        "narHash": "sha256-c9YAcaH1dr4IwhPnC9W/KaZTA49k8uMVh55fZ2gW3+Q=",
+        "owner": "cooparo",
         "repo": "nixos-hardware",
-        "rev": "4471c6a218fe813ad4838c400866c8845d3eba6b",
+        "rev": "7243316dae6153eaef9359732d53d9f085668c43",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "master",
+        "owner": "cooparo",
+        "ref": "dell-xps-14-da14260",
         "repo": "nixos-hardware",
         "type": "github"
       }
