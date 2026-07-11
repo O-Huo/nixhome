@@ -29,6 +29,27 @@
         )
       '';
     };
+    keyboards.realforce = {
+      devices = [ "/dev/input/by-id/usb-Topre_REALFORCE_87_US-event-kbd" ];
+      # kanata's uinput device defaults to bus i8042, which libinput's shipped
+      # "MatchBus=ps2 -> AttrKeyboardIntegration=internal" quirk tags as the
+      # built-in keyboard. libinput pairs the internal keyboard with the lid
+      # switch, so a keypress while the lid reads closed is taken as proof the
+      # switch is stuck and it forces the lid open -- relighting the internal
+      # panel under a closed lid. Announce this external board as what it is.
+      extraDefCfg = ''
+        linux-output-device-name "kanata realforce"
+        linux-output-device-bus-type USB
+      '';
+      config = ''
+        (defsrc
+          caps lalt lmet
+        )
+        (deflayer base
+          lctl lmet lalt
+        )
+      '';
+    };
   };
 
   services.power-profiles-daemon.enable = true;
