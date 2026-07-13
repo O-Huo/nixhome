@@ -87,6 +87,23 @@
         ];
       };
 
+      "XF86MonBrightnessUp" = {
+        allow-when-locked = true;
+        action.spawn = [
+          "brightnessctl"
+          "set"
+          "5%+"
+        ];
+      };
+      "XF86MonBrightnessDown" = {
+        allow-when-locked = true;
+        action.spawn = [
+          "brightnessctl"
+          "set"
+          "5%-"
+        ];
+      };
+
       "Mod+Q".action.close-window = { };
 
       "Mod+Left".action.focus-column-left = { };

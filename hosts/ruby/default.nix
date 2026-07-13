@@ -52,6 +52,11 @@
     };
   };
 
+  # brightnessctl's rules chgrp the backlight to "video" and make it group-writable;
+  # without them /sys/class/backlight/intel_backlight/brightness is root-only.
+  environment.systemPackages = [ pkgs.brightnessctl ];
+  services.udev.packages = [ pkgs.brightnessctl ];
+
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
   services.logind.settings.Login.HandleLidSwitch = "suspend";
