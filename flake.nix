@@ -59,11 +59,16 @@
       ...
     }@inputs:
     let
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
       pkgsX86 = import nixpkgs {
         system = "x86_64-linux";
+        config = nixpkgsConfig;
       };
       pkgsArm = import nixpkgs {
         system = "aarch64-darwin";
+        config = nixpkgsConfig;
       };
 
       # Import shells function properly
@@ -78,6 +83,7 @@
       mkHost = host: {
         ${host} = nixos.lib.nixosSystem {
           modules = [
+            { nixpkgs.config = nixpkgsConfig; }
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             ./hosts/${host}
@@ -127,6 +133,7 @@
       darwinConfigurations."Aos-MacBook-Air" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         modules = [
+          { nixpkgs.config = nixpkgsConfig; }
           ./hosts/darwin
         ];
         specialArgs = { inherit inputs; };

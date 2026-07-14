@@ -5,8 +5,6 @@
   ...
 }:
 {
-  nixpkgs.config.allowUnfree = true;
-
   imports = [
     ./nixvim/nixvim.nix
     ./vscode/vscode.nix

@@ -163,8 +163,7 @@
     ];
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  # allowUnfree is set globally in flake.nix.
   nixpkgs.overlays = [
     inputs.niri.overlays.niri
   ];

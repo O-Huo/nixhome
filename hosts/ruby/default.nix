@@ -9,7 +9,7 @@
     ../common/aoli.nix
   ];
 
- boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
+  boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
 
   boot.initrd.systemd.enable = true;
@@ -22,10 +22,10 @@
       devices = [ "/dev/input/by-path/platform-i8042-serio-0-event-kbd" ];
       config = ''
         (defsrc
-          caps lalt lmet
+        caps lalt lmet
         )
         (deflayer base
-          lctl lmet lalt
+        lctl lmet lalt
         )
       '';
     };
@@ -43,10 +43,10 @@
       '';
       config = ''
         (defsrc
-          caps lalt lmet
+        caps lalt lmet
         )
         (deflayer base
-          lctl lmet lalt
+        lctl lmet lalt
         )
       '';
     };
@@ -60,4 +60,21 @@
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
   services.logind.settings.Login.HandleLidSwitch = "suspend";
+
+  # power-profiles-daemon has no built-in AC/battery switching, so drive it from
+  # the AC adapter's udev events (and once at boot, when udev coldplugs it).
+  systemd.services."power-profile@" = {
+    description = "Set power profile to %I";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.power-profiles-daemon}/bin/powerprofilesctl set %i";
+    };
+    after = [ "power-profiles-daemon.service" ];
+    requires = [ "power-profiles-daemon.service" ];
+  };
+
+  services.udev.extraRules = ''
+    SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@power-saver.service"
+    SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
+  '';
 }
