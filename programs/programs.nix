@@ -95,6 +95,7 @@
     pkgs.dragon-drop
     pkgs.rr
     pkgs.kdePackages.okular
+    pkgs.usbutils
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
   ];
