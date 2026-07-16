@@ -1,20 +1,24 @@
 {
   pkgs,
   config,
+  lib,
   starship-jj,
+  isHeadless ? false,
   ...
 }:
 {
   imports = [
     ./nixvim/nixvim.nix
-    ./vscode/vscode.nix
     ./gh
-    ./browserpass
     ./atuin
     ./starship
     ./zellij
-    ./alacritty
     ./yazi
+  ]
+  ++ lib.optionals (!isHeadless) [
+    ./vscode/vscode.nix
+    ./browserpass
+    ./alacritty
     ./zed
     ./thunderbird
   ];
@@ -25,14 +29,11 @@
     pkgs.yubikey-manager
     pkgs.awscli2
     pkgs.nix-output-monitor
-    pkgs.qemu
-    pkgs.zed-editor
     pkgs.ripgrep
     pkgs.cachix
     pkgs.btop
     pkgs.codex
     pkgs.pciutils
-    pkgs.alacritty
     # pkgs.claude-code
     pkgs.nix-index
     pkgs.nixd
@@ -46,12 +47,10 @@
     pkgs.git-remote-hg
     pkgs.unzip
     pkgs.fish
-    pkgs.browserpass
     pkgs.pass
     pkgs.nil
     pkgs.cloc
     pkgs.fastfetch
-    pkgs.vscode
     pkgs.gh
     pkgs.git
     pkgs.git-lfs
@@ -69,7 +68,6 @@
         ipython
       ]
     ))
-    pkgs.texliveFull
     pkgs.wget
     pkgs.atuin
     (pkgs.symlinkJoin {
@@ -83,8 +81,16 @@
       ];
     })
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) (import ./gui-apps.nix pkgs)
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux) [
+  ++ pkgs.lib.optionals (!isHeadless) [
+    pkgs.qemu
+    pkgs.zed-editor
+    pkgs.alacritty
+    pkgs.browserpass
+    pkgs.vscode
+    pkgs.texliveFull
+  ]
+  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
+  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) [
     pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse

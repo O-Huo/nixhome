@@ -1,4 +1,9 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  isHeadless ? false,
+  ...
+}:
 {
   # Explicitly enable Atuin for aoli
   programs.atuin.enable = lib.mkDefault true;
@@ -8,7 +13,7 @@
   };
   # GUI apps; on macOS these are installed via nix-darwin instead so they show
   # up in Spotlight/Launchpad, so only add them to the profile on Linux.
-  home.packages = lib.optionals (!pkgs.stdenv.isDarwin) (with pkgs; [
+  home.packages = lib.optionals (!pkgs.stdenv.isDarwin && !isHeadless) (with pkgs; [
     jetbrains.idea
     jetbrains.rust-rover
     visualvm

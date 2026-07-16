@@ -11,6 +11,9 @@
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "octal";
 
+  # Build aarch64 derivations (e.g. the jex SD image) through qemu-user.
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   # Let the session (noctalia idle via mouse-inhibit) suppress mouse input while
   # monitors are powered off, so only the keyboard wakes the screen.
   services.udev.extraRules = ''

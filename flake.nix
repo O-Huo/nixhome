@@ -4,6 +4,10 @@
     extra-substituters = [
       "https://nix-community.cachix.org"
       "https://niri.cachix.org"
+      "https://nixos-raspberrypi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
     ];
   };
   inputs = {
@@ -35,6 +39,7 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
@@ -61,6 +66,7 @@
     let
       nixpkgsConfig = {
         allowUnfree = true;
+        permittedInsecurePackages = [ "electron-40.10.5" ];
       };
       pkgsX86 = import nixpkgs {
         system = "x86_64-linux";
@@ -68,6 +74,10 @@
       };
       pkgsArm = import nixpkgs {
         system = "aarch64-darwin";
+        config = nixpkgsConfig;
+      };
+      pkgsArmLinux = import nixpkgs {
+        system = "aarch64-linux";
         config = nixpkgsConfig;
       };
 
@@ -80,47 +90,79 @@
         "ruby"
         "nixnas"
       ];
-      mkHost = host: {
-        ${host} = nixos.lib.nixosSystem {
+      mkSystem =
+        modules:
+        nixos.lib.nixosSystem {
           modules = [
             { nixpkgs.config = nixpkgsConfig; }
             nur.modules.nixos.default
             vscode-server.nixosModules.default
-            ./hosts/${host}
-          ];
+          ]
+          ++ modules;
           specialArgs = { inherit inputs; };
         };
+      mkHost = host: {
+        ${host} = mkSystem [ ./hosts/${host} ];
       };
+
+      mkJexSystem =
+        modules:
+        inputs.nixos-raspberrypi.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [
+            { nixpkgs.config = nixpkgsConfig; }
+            nur.modules.nixos.default
+            vscode-server.nixosModules.default
+            ./hosts/jex
+          ]
+          ++ modules;
+        };
 
       accounts = [
         "aoli@octal"
         "aoli@ruby"
+        "aoli@jex"
         "hao@linux"
         "hao@nixnas"
       ];
+      hostSystems = {
+        jex = "aarch64-linux";
+      };
+      headlessHosts = [ "jex" ];
+      pkgsFor = {
+        "x86_64-linux" = pkgsX86;
+        "aarch64-linux" = pkgsArmLinux;
+      };
       mkAccount =
         account:
         let
           parts = nixpkgs.lib.splitString "@" account;
           user = builtins.elemAt parts 0;
           host = builtins.elemAt parts 1;
+          system = hostSystems.${host} or "x86_64-linux";
+          pkgs = pkgsFor.${system};
+          isHeadless = builtins.elem host headlessHosts;
         in
         {
           "${account}" = home-manager.lib.homeManagerConfiguration {
-            pkgs = pkgsX86;
+            inherit pkgs;
             modules = [
               (./programs/accounts + "/${user}.nix")
               (./programs/hosts + "/${host}.nix")
+            ]
+            ++ nixpkgs.lib.optionals (!isHeadless) [
               niri.homeModules.niri
               ./programs/niri
+            ]
+            ++ [
               ./home.nix
               nixvim.homeModules.nixvim
               catppuccin.homeModules.catppuccin
             ];
             extraSpecialArgs = {
-              inherit inputs;
-              isLinux = pkgsX86.stdenv.isLinux;
-              starship-jj = starship-jj.packages.x86_64-linux.default;
+              inherit inputs isHeadless;
+              isLinux = pkgs.stdenv.isLinux;
+              starship-jj = starship-jj.packages.${system}.default;
             };
           };
         };
@@ -128,7 +170,11 @@
     {
       packages = home-manager.packages;
 
-      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
+      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts) // {
+        jex = mkJexSystem [ ];
+      };
+
+      images.jex = (mkJexSystem [ ./hosts/jex/sd-image.nix ]).config.system.build.sdImage;
 
       darwinConfigurations."Aos-MacBook-Air" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
@@ -151,6 +197,7 @@
           extraSpecialArgs = {
             inherit inputs;
             isLinux = false;
+            isHeadless = false;
             starship-jj = starship-jj.packages.aarch64-darwin.default;
           };
         };
