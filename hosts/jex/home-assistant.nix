@@ -5,6 +5,7 @@
     enable = true;
     customComponents = [
       (pkgs.callPackage ./hacs.nix { })
+      (pkgs.callPackage ./yi-hack.nix { })
     ];
     extraComponents = [
       "analytics"
@@ -59,6 +60,12 @@
     5353
   ];
 
-  # Default port of the HomeKit bridge (each additional bridge adds one).
-  networking.firewall.allowedTCPPorts = [ 21063 ];
+  # HomeKit bridge ports: HA assigns the next free port starting at 21063
+  # each time a bridge entry is (re)created, so open a small range.
+  networking.firewall.allowedTCPPortRanges = [
+    {
+      from = 21063;
+      to = 21070;
+    }
+  ];
 }
