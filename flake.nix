@@ -40,6 +40,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
@@ -107,10 +112,19 @@
 
       mkJexSystem =
         modules:
-        inputs.nixos-raspberrypi.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
+        nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs;
+            inherit (inputs) nixos-raspberrypi;
+          };
           modules = [
-            { nixpkgs.config = nixpkgsConfig; }
+            {
+              nixpkgs.hostPlatform = "aarch64-linux";
+              nixpkgs.config = nixpkgsConfig;
+              hardware.deviceTree.enable = true;
+              system.boot.loader.kernelFile = "Image";
+            }
+            inputs.nixos-raspberrypi.lib.inject-overlays
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             ./hosts/jex

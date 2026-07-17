@@ -24,7 +24,7 @@ buildHomeAssistantComponent rec {
   nativeBuildInputs = [ unzip ];
 
   dependencies = [
-    home-assistant.python.pkgs.aiogithubapi
+    home-assistant.python3Packages.aiogithubapi
   ];
 
   meta = {
