@@ -23,6 +23,8 @@
   # Both users are in wheel; let them sudo without a password.
   security.sudo.wheelNeedsPassword = false;
 
+  nix.settings.trusted-users = [ "@wheel" ];
+
   # Kernel, firmware and bootloader (U-Boot + managed /boot/firmware
   # partition) come from nixos-raspberrypi's raspberry-pi-4 module.
 
