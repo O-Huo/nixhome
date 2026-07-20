@@ -7,6 +7,17 @@
     };
     outputs."eDP-1" = {
       scale = 1.5;
+      position = {
+        x = 320;
+        y = 1440;
+      };
+    };
+    outputs."Dell Inc. DELL S2725QC 4P7MS84" = {
+      scale = 1.5;
+      position = {
+        x = 0;
+        y = 0;
+      };
     };
     outputs."ASUSTek COMPUTER INC PG32UCDM S3LMQS114886" = {
       scale = 1.5;
