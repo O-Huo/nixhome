@@ -39,7 +39,7 @@
     pkgs.nixd
     pkgs.killall
     pkgs.dive
-    pkgs.podman-tui
+    pkgs.lazydocker
     pkgs.yazi
     pkgs.jujutsu
     pkgs.jjui

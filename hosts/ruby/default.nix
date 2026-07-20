@@ -12,6 +12,21 @@
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
 
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    # Required for browser-extension pairing and system-authentication unlock.
+    polkitPolicyOwners = [ "aoli" ];
+  };
+  # nixpkgs' firefox runs as ".firefox-wrapped", which is not on 1Password's
+  # built-in browser allowlist; Chrome ("chrome") is allowed by default.
+  environment.etc."1password/custom_allowed_browsers" = {
+    text = ''
+      .firefox-wrapped
+    '';
+    mode = "0755";
+  };
+
   boot.initrd.systemd.enable = true;
 
 
@@ -54,7 +69,10 @@
 
   # brightnessctl's rules chgrp the backlight to "video" and make it group-writable;
   # without them /sys/class/backlight/intel_backlight/brightness is root-only.
-  environment.systemPackages = [ pkgs.brightnessctl ];
+  environment.systemPackages = [
+    pkgs.brightnessctl
+    pkgs.docker-compose
+  ];
   services.udev.packages = [ pkgs.brightnessctl ];
 
   services.power-profiles-daemon.enable = true;

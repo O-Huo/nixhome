@@ -8,7 +8,7 @@
     description = "Ao Li";
     shell = pkgs.fish;
     extraGroups = [
-      "podman"
+      "docker"
       "networkmanager"
       "wheel"
       "libvirtd"

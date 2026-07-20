@@ -1,5 +1,9 @@
-{ programs, ... }:
+{ pkgs, ... }:
 {
+  home.packages = [
+    pkgs.teams-for-linux
+  ];
+
   programs.niri.settings = {
     cursor = {
       theme = "Nordic-cursors";
@@ -13,6 +17,13 @@
       };
     };
     outputs."Dell Inc. DELL S2725QC 4P7MS84" = {
+      scale = 1.5;
+      position = {
+        x = 0;
+        y = 0;
+      };
+    };
+    outputs."Dell Inc. DELL S2725QC 2NGMS84" = {
       scale = 1.5;
       position = {
         x = 0;

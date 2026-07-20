@@ -60,9 +60,9 @@
 
   # llama.cpp SYCL inference server on the B70.
   # Models live on the fast NVMe; bind to localhost only.
-  virtualisation.podman.enable = true;
+  virtualisation.docker.enable = true;
   virtualisation.oci-containers = {
-    backend = "podman";
+    backend = "docker";
     containers.llama-server = {
       image = "ghcr.io/ggml-org/llama.cpp:server-intel";
       pull = "newer";
