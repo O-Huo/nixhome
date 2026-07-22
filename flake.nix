@@ -5,9 +5,11 @@
       "https://nix-community.cachix.org"
       "https://niri.cachix.org"
       "https://nixos-raspberrypi.cachix.org"
+      "https://chaotic-nyx.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+      "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
     ];
   };
   inputs = {
@@ -40,6 +42,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -102,6 +105,7 @@
             { nixpkgs.config = nixpkgsConfig; }
             nur.modules.nixos.default
             vscode-server.nixosModules.default
+            inputs.chaotic.nixosModules.default
           ]
           ++ modules;
           specialArgs = { inherit inputs; };
@@ -127,6 +131,7 @@
             inputs.nixos-raspberrypi.lib.inject-overlays
             nur.modules.nixos.default
             vscode-server.nixosModules.default
+            inputs.chaotic.nixosModules.default
             ./hosts/jex
           ]
           ++ modules;
