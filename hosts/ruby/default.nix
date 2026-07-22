@@ -4,10 +4,15 @@
       inherit pkgs inputs;
       withNvidia = false;
     })
-    inputs.nixos-hardware.nixosModules.dell-xps-14-da14260
+    ./xps-14-da14260
+    ./ipu7/module.nix
     ./hardware-configuration.nix
     ../common/aoli.nix
   ];
+
+  # IPU7 camera HAL stack from nixpkgs PR #542085; remove together with
+  # ./ipu7 once the PR is merged.
+  nixpkgs.overlays = [ (import ./ipu7/overlay.nix) ];
 
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
