@@ -10,6 +10,7 @@
   imports = [
     ./nixvim/nixvim.nix
     ./gh
+    ./agents
     ./atuin
     ./starship
     ./zellij
