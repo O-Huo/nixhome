@@ -107,6 +107,9 @@ in {
       input.touchpad = {
         dwt = true;
       };
+      layout = {
+        default-column-width.proportion = 0.5;
+      };
       switch-events = {
         lid-close.action.spawn = ["noctalia" "msg" "session" "lock"];
       };
