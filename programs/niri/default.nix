@@ -31,9 +31,9 @@ in {
         auto_hide = true;
         reserve_space = false;
       };
-      bar = {
-        density = "compact";
+      bar.default = {
         position = "top";
+        start = [ "launcher" "wallpaper" "workspaces" "taskbar" ];
       };
       theme = {
         source = "builtin";
@@ -71,6 +71,7 @@ in {
     wl-clipboard
     xwayland-satellite
     nordic
+    hicolor-icon-theme
   ];
 
   xdg = {
