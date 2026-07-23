@@ -80,8 +80,8 @@
   ];
   services.udev.packages = [ pkgs.brightnessctl ];
 
-  powerManagement.powertop.enable = true;
   boot.kernelParams = [ "pcie_aspm.policy=powersupersave" ];
+  boot.extraModprobeConfig = "options snd_hda_intel power_save=1";
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
@@ -102,5 +102,10 @@
   services.udev.extraRules = ''
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@power-saver.service"
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
+
+    ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+    # USB autosuspend makes HID devices drop off the bus (Razer Basilisk V3);
+    # keep non-hub USB devices awake. Hubs (class 09) keep the kernel default.
+    ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
   '';
 }
