@@ -4,12 +4,15 @@
   withNvidia ? false,
   ...
 }:
+let
+  kernelPackages = pkgs.linuxPackages_cachyos;
+in
 {
   imports = [
     ./niri.nix
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.kernelPackages = kernelPackages;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -66,7 +69,7 @@
 
   # https://wiki.nixos.org/wiki/NVIDIA
   hardware.graphics.enable = true;
-  hardware.nvidia.package = pkgs.linuxPackages_7_1.nvidiaPackages.latest;
+  hardware.nvidia.package = kernelPackages.nvidiaPackages.latest;
   services.xserver.videoDrivers = if withNvidia then [ "nvidia" ] else [ ];
   hardware.nvidia.open = false;
   hardware.nvidia.modesetting.enable = withNvidia;
