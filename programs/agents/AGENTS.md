@@ -6,6 +6,7 @@
   The repo may be colocated, but treat jj as the source of truth.
 - For parallel work on multiple changes, use `jj workspace` (e.g.
   `jj workspace add`) instead of git worktrees or cloning the repo again.
+- Do not commit or create PRs unless explicitly instructed to do so
 
 ## Dependencies
 - I use Nix for dependency management. Don't suggest installing tools
