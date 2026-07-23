@@ -9,7 +9,7 @@
     ./niri.nix
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_7_1;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
