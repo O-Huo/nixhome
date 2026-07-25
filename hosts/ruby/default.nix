@@ -85,7 +85,11 @@
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
-  services.logind.settings.Login.HandleLidSwitch = "suspend";
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend";
+    HandleLidSwitchExternalPower = "lock";
+    IdleAction = "ignore";
+  };
 
   # power-profiles-daemon has no built-in AC/battery switching, so drive it from
   # the AC adapter's udev events (and once at boot, when udev coldplugs it).
