@@ -11,7 +11,6 @@
           # cssls.enable = true;
           # html.enable = true;
           # bashls.enable = true;
-          # pylsp.enable = true;
         };
       };
       # trouble.enable = true;
@@ -74,6 +73,66 @@
         action = "<cmd> IncRename <CR>";
         mode = "n";
         options.desc = "LSP Rename";
+      }
+
+      {
+        key = "<M-LeftMouse>";
+        action = "<LeftMouse><cmd>lua vim.lsp.buf.definition()<CR>";
+        mode = [ "n" "i" ];
+        options = {
+          silent = true;
+          desc = "Goto definition (alt+click)";
+        };
+      }
+
+      {
+        key = "<M-RightMouse>";
+        action = "<C-o>";
+        mode = "n";
+        options = {
+          silent = true;
+          desc = "Jump back (alt+right click)";
+        };
+      }
+
+      {
+        key = "<C-M-Left>";
+        action = "<C-o>";
+        mode = "n";
+        options = {
+          silent = true;
+          desc = "Jump back";
+        };
+      }
+
+      {
+        key = "<C-M-Right>";
+        action = "<C-i>";
+        mode = "n";
+        options = {
+          silent = true;
+          desc = "Jump forward";
+        };
+      }
+
+      {
+        key = "<X1Mouse>";
+        action = "<C-o>";
+        mode = "n";
+        options = {
+          silent = true;
+          desc = "Jump back (mouse back button)";
+        };
+      }
+
+      {
+        key = "<X2Mouse>";
+        action = "<C-i>";
+        mode = "n";
+        options = {
+          silent = true;
+          desc = "Jump forward (mouse forward button)";
+        };
       }
     ];
   };
