@@ -141,13 +141,17 @@
         "aoli@octal"
         "aoli@ruby"
         "aoli@jex"
+        "aoli@arrakis"
         "hao@linux"
         "hao@nixnas"
       ];
       hostSystems = {
         jex = "aarch64-linux";
       };
-      headlessHosts = [ "jex" ];
+      headlessHosts = [
+        "jex"
+        "arrakis"
+      ];
       pkgsFor = {
         "x86_64-linux" = pkgsX86;
         "aarch64-linux" = pkgsArmLinux;
