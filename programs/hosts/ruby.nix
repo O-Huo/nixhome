@@ -30,6 +30,13 @@
         y = 0;
       };
     };
+    outputs."Dell Inc. DELL S2725QC 2TBFS84" = {
+      scale = 1.5;
+      position = {
+        x = 0;
+        y = 0;
+      };
+    };
     outputs."ASUSTek COMPUTER INC PG32UCDM S3LMQS114886" = {
       scale = 1.5;
       # max-bpc = 10;
@@ -38,6 +45,10 @@
         width = 3840;
         height = 2160;
         refresh = 240.016;
+      };
+      position = {
+        x = 0;
+        y = 0;
       };
     };
   };
