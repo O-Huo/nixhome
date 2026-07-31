@@ -2,6 +2,7 @@
 {
   home.packages = [
     pkgs.teams-for-linux
+    pkgs.google-cloud-sdk
   ];
 
   programs.niri.settings = {
