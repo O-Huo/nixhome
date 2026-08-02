@@ -5,9 +5,16 @@
       withNvidia = true;
     })
     ../common/hao.nix
+    ../common/aoli.nix
     ./hardware-configuration.nix
   ];
   networking.hostName = "xiangpeng-pittsburgh";
+
+  # Homebridge (HomeKit bridge), web UI on port 8581
+  services.homebridge = {
+    enable = true;
+    openFirewall = true;
+  };
 
   # GitHub Actions Runner
   services.github-runners.pittsburgh = {
