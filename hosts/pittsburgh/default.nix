@@ -10,7 +10,13 @@
   ];
   networking.hostName = "xiangpeng-pittsburgh";
 
-  # Homebridge (HomeKit bridge), web UI on port 8581
+  nixpkgs.overlays = [
+    (final: prev: {
+      homebridge-config-ui-x = prev.homebridge-config-ui-x.override {
+        nodejs_22 = final.nodejs_24;
+      };
+    })
+  ];
   services.homebridge = {
     enable = true;
     openFirewall = true;
