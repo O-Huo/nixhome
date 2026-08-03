@@ -7,8 +7,7 @@
 
   programs.niri.settings = {
     cursor = {
-      theme = "Nordic-cursors";
-      size = 48;
+      size = 32;
     };
     outputs."eDP-1" = {
       scale = 1.5;
@@ -17,25 +16,16 @@
         y = 1440;
       };
     };
-    outputs."Dell Inc. DELL S2725QC 4P7MS84" = {
+    outputs."DP-1" = {
       scale = 1.5;
       position = {
         x = 0;
         y = 0;
       };
-    };
-    outputs."Dell Inc. DELL S2725QC 2NGMS84" = {
-      scale = 1.5;
-      position = {
-        x = 0;
-        y = 0;
-      };
-    };
-    outputs."Dell Inc. DELL S2725QC 2TBFS84" = {
-      scale = 1.5;
-      position = {
-        x = 0;
-        y = 0;
+      mode = {
+        width = 3840;
+        height = 2160;
+        refresh = 120.000;
       };
     };
     outputs."ASUSTek COMPUTER INC PG32UCDM S3LMQS114886" = {

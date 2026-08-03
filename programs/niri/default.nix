@@ -64,13 +64,20 @@ in {
       };
     };
   };
+  home.pointerCursor = {
+    enable = true;
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Classic";
+    size = 48;
+    gtk.enable = true;
+  };
+
   home.packages = with pkgs; [
     mouse-inhibit
     grim
     slurp
     wl-clipboard
     xwayland-satellite
-    nordic
     hicolor-icon-theme
   ];
 
@@ -105,6 +112,7 @@ in {
     package = pkgs.niri-unstable;
 
     settings = {
+      cursor.theme = "Bibata-Modern-Classic";
       input.touchpad = {
         dwt = true;
       };
