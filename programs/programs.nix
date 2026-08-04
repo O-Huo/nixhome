@@ -27,6 +27,7 @@
   home.packages = [
     starship-jj
     pkgs.gnupg
+    pkgs.tree
     pkgs.yubikey-manager
     pkgs.awscli2
     pkgs.nix-output-monitor
