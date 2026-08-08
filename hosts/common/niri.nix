@@ -1,5 +1,9 @@
 { pkgs, lib, inputs, ... }:
 {
+  imports = [
+    inputs.noctalia-greeter.nixosModules.default
+  ];
+
   programs.niri.enable = true;
 
   environment.systemPackages = with pkgs; [
@@ -12,12 +16,14 @@
     NIXHOME_PATH = builtins.toString ./../..;
   };
   services.gnome.gnome-keyring.enable = true;
-  services.greetd = {
+  programs.noctalia-greeter = {
     enable = true;
     settings = {
-      default_session = {
-        command = "${lib.makeBinPath [ pkgs.tuigreet ]}/tuigreet --time --remember --cmd ${pkgs.niri}/bin/niri-session";
-        user = "greeter";
+      session.default = "niri";
+      cursor = {
+        theme = "Bibata-Modern-Classic";
+        size = 24;
+        path = "${pkgs.bibata-cursors}/share/icons";
       };
     };
   };

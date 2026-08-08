@@ -33,6 +33,7 @@ in {
       };
       bar.default = {
         position = "top";
+        margin_ends = 0;
         start = [ "launcher" "wallpaper" "workspaces" "taskbar" ];
       };
       theme = {

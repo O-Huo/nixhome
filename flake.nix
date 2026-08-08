@@ -36,6 +36,10 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     agenix = {
