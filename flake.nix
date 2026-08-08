@@ -87,6 +87,19 @@
         config = nixpkgsConfig;
       };
 
+      chaoticModule = {
+        chaotic.nyx.overlay.enable = false;
+        nixpkgs.overlays = [
+          (import "${inputs.chaotic}/overlays/cache-friendly.nix" {
+            flakes = {
+              inherit (inputs.chaotic.inputs) nixpkgs;
+              self = inputs.chaotic;
+            };
+            inherit nixpkgsConfig;
+          })
+        ];
+      };
+
       # Import shells function properly
       importShells = pkgs: import ./shells.nix pkgs;
       hosts = [
@@ -101,6 +114,7 @@
         nixos.lib.nixosSystem {
           modules = [
             { nixpkgs.config = nixpkgsConfig; }
+            chaoticModule
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             inputs.chaotic.nixosModules.default
@@ -126,6 +140,7 @@
               hardware.deviceTree.enable = true;
               system.boot.loader.kernelFile = "Image";
             }
+            chaoticModule
             inputs.nixos-raspberrypi.lib.inject-overlays
             nur.modules.nixos.default
             vscode-server.nixosModules.default

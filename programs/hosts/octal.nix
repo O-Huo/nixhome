@@ -1,7 +1,7 @@
 { ... }:
 {
   wayland.windowManager.niri.settings = {
-    cursor.xcursor-size = 48;
+    cursor.xcursor-size = 32;
     _children = [
       {
         output = {

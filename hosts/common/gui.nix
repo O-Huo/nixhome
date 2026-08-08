@@ -69,9 +69,13 @@ in
 
   # https://wiki.nixos.org/wiki/NVIDIA
   hardware.graphics.enable = true;
-  hardware.nvidia.package = kernelPackages.nvidiaPackages.latest;
+  # Must be the CachyOS-specific driver; the generic nvidiaPackages.* are not
+  # built against this kernel's LTO toolchain.
+  hardware.nvidia.package = pkgs.nvidia_cachyos;
   services.xserver.videoDrivers = if withNvidia then [ "nvidia" ] else [ ];
-  hardware.nvidia.open = false;
+  # Chaotic only prebuilds the open modules for the CachyOS kernel; the closed
+  # ones are uncached and fail their reference check since 610.57.04.
+  hardware.nvidia.open = true;
   hardware.nvidia.modesetting.enable = withNvidia;
   boot.blacklistedKernelModules = pkgs.lib.optionals withNvidia [ "amdgpu" ];
   # Enable touchpad support (enabled default in most desktopManager).
