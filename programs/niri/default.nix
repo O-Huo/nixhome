@@ -115,6 +115,8 @@ in {
       cursor.theme = "Bibata-Modern-Classic";
       input.touchpad = {
         dwt = true;
+        tap = false;
+        click-method = "clickfinger";
       };
       layout = {
         default-column-width.proportion = 0.5;
