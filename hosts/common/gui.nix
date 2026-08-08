@@ -82,9 +82,4 @@ in
   programs.steam = {
     enable = withNvidia;
   };
-
-  # allowUnfree is set globally in flake.nix.
-  nixpkgs.overlays = [
-    inputs.niri.overlays.niri
-  ];
 }

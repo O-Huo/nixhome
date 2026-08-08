@@ -3,7 +3,6 @@
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"
-      "https://niri.cachix.org"
       "https://nixos-raspberrypi.cachix.org"
       "https://chaotic-nyx.cachix.org"
     ];
@@ -37,10 +36,6 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     agenix = {
@@ -66,7 +61,6 @@
       vscode-server,
       nur,
       catppuccin,
-      niri,
       nixos-hardware,
       starship-jj,
       ...
@@ -174,7 +168,6 @@
               (./programs/hosts + "/${host}.nix")
             ]
             ++ nixpkgs.lib.optionals (!isHeadless) [
-              niri.homeModules.niri
               ./programs/niri
             ]
             ++ [

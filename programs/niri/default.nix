@@ -8,12 +8,12 @@ let
     done
   '';
   screen-off = pkgs.writeShellScript "screen-off" ''
-    ${lib.getExe pkgs.niri-unstable} msg action power-off-monitors
+    ${lib.getExe pkgs.niri} msg action power-off-monitors
     ${lib.getExe mouse-inhibit} 1
   '';
   screen-on = pkgs.writeShellScript "screen-on" ''
     ${lib.getExe mouse-inhibit} 0
-    ${lib.getExe pkgs.niri-unstable} msg action power-on-monitors
+    ${lib.getExe pkgs.niri} msg action power-on-monitors
   '';
 in {
   imports = [
@@ -107,43 +107,32 @@ in {
   };
 
 
-  programs.niri = {
+  wayland.windowManager.niri = {
     enable = true;
-    package = pkgs.niri-unstable;
 
     settings = {
-      cursor.theme = "Bibata-Modern-Classic";
+      cursor.xcursor-theme = "Bibata-Modern-Classic";
       input.touchpad = {
-        dwt = true;
-        tap = false;
+        dwt = { };
+        natural-scroll = { };
         click-method = "clickfinger";
       };
       layout = {
         default-column-width.proportion = 0.5;
       };
       switch-events = {
-        lid-close.action.spawn = ["noctalia" "msg" "session" "lock"];
+        lid-close.spawn = ["noctalia" "msg" "session" "lock"];
       };
-      window-rules = [
-        {
-          matches = [{ app-id = "^alacritty-yazi$"; }];
-          open-floating = true;
-        }
+      window-rule = {
+        match._props.app-id = "^alacritty-yazi$";
+        open-floating = true;
+      };
+      _children = [
+        { spawn-at-startup._args = ["fcitx5" "-d"]; }
+        { spawn-at-startup._args = ["blueman-applet"]; }
+        { spawn-at-startup._args = ["nm-applet" "--indicator"]; }
+        { spawn-at-startup._args = ["noctalia"]; }
       ];
-      spawn-at-startup = [
-          {
-            command = ["fcitx5" "-d"];
-          }
-          {
-            command = ["blueman-applet"];
-          }
-          {
-            command = ["nm-applet" "--indicator"];
-          }
-          {
-            command = ["noctalia"];
-          }
-        ];
     };
   };
 }

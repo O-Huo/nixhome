@@ -1,12 +1,6 @@
 { pkgs, lib, inputs, ... }:
 {
-  imports = [
-    inputs.niri.nixosModules.niri
-  ];
-  programs.niri = {
-    enable = true;
-    package = pkgs.niri-unstable;
-  };
+  programs.niri.enable = true;
 
   environment.systemPackages = with pkgs; [
     inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -22,7 +16,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${lib.makeBinPath [ pkgs.tuigreet ]}/tuigreet --time --remember --cmd ${pkgs.niri-unstable}/bin/niri-session";
+        command = "${lib.makeBinPath [ pkgs.tuigreet ]}/tuigreet --time --remember --cmd ${pkgs.niri}/bin/niri-session";
         user = "greeter";
       };
     };
