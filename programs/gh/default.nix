@@ -46,6 +46,9 @@
       ui = {
         always-allow-large-revsets = true;
       };
+      snapshot = {
+        max-new-file-size = "50MiB";
+      };
     };
   };
 
