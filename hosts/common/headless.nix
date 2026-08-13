@@ -96,7 +96,6 @@
     "https://nix-community.cachix.org"
     "https://cache.numtide.com"
     "https://noctalia.cachix.org"
-    "https://nixos-raspberrypi.cachix.org"
   ];
   nix.settings.trusted-public-keys = [
     # Compare to the key published at https://nix-community.org/cache
@@ -104,7 +103,6 @@
     # https://cache.numtide.com/index.html
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
-    "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
   ];
   nix.optimise.automatic = true;
   nix.optimise.dates = [ "03:45" ];
@@ -118,6 +116,6 @@
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
-  # Hosts installed later (e.g. jex) override this with their own value.
+  # Hosts installed later override this with their own value.
   system.stateVersion = pkgs.lib.mkDefault "24.11";
 }
