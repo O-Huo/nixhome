@@ -3,6 +3,7 @@
   home.packages = [
     pkgs.teams-for-linux
     pkgs.google-cloud-sdk
+    pkgs.librepods
   ];
 
   wayland.windowManager.niri.settings = {
