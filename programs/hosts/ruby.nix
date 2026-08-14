@@ -21,6 +21,16 @@
       }
       {
         output = {
+          _args = [ "Dell Inc. DELL U2722D 3GH2ZG3" ];
+          scale = 1;
+          position._props = {
+            x = 0;
+            y = 0;
+          };
+        };
+      }
+      {
+        output = {
           _args = [ "DP-1" ];
           scale = 1.5;
           position._props = {

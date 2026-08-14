@@ -8,6 +8,7 @@
     ./ipu7/module.nix
     ./hardware-configuration.nix
     ../common/aoli.nix
+    inputs.intel-lpmd-flake.nixosModules.default
   ];
 
   # IPU7 camera HAL stack from nixpkgs PR #542085; remove together with
@@ -16,6 +17,8 @@
 
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
+
+  virtualisation.docker.enable = lib.mkForce false;
 
   programs._1password.enable = true;
   programs._1password-gui = {
@@ -76,7 +79,6 @@
   # without them /sys/class/backlight/intel_backlight/brightness is root-only.
   environment.systemPackages = [
     pkgs.brightnessctl
-    pkgs.docker-compose
   ];
   services.udev.packages = [ pkgs.brightnessctl ];
 
@@ -84,6 +86,20 @@
   boot.extraModprobeConfig = "options snd_hda_intel power_save=1";
 
   networking.networkmanager.wifi.powersave = false;
+
+  services.intel-lpmd = {
+    enable = true;
+    # Panther Lake config with CachyOS's intel-lpmd@9c8739c applied:
+    # Balanced/Powersaver use auto LPM instead of force-off.
+    config.custom = {
+      filename = "intel_lpmd_config_F6_M204.xml";
+      content =
+        builtins.replaceStrings
+          [ "<BalancedDef>-1</BalancedDef>" "<PowersaverDef>-1</PowersaverDef>" ]
+          [ "<BalancedDef>0</BalancedDef>" "<PowersaverDef>0</PowersaverDef>" ]
+          (builtins.readFile "${inputs.intel-lpmd-flake.packages.${pkgs.system}.default}/share/xml/intel_lpmd_config_F6_M204.xml");
+    };
+  };
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;

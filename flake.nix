@@ -46,6 +46,10 @@
       url = "gitlab:lanastara_foss/starship-jj";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    intel-lpmd-flake = {
+      url = "github:dmfrpro/intel-lpmd-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     {
