@@ -52,12 +52,6 @@
   # negotiation. The relay service below creates a configured device at runtime.
   boot.extraModprobeConfig = "options v4l2loopback devices=0";
 
-  # Prevent the SVP7500 USB bridge from autosuspending; the bridge firmware
-  # has issues with power-state transitions that cause it to wedge on resume.
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="-1"
-  '';
-
   # Most applications (browsers, video-conferencing, cheese) only speak V4L2
   # and cannot use the IPU7 camera HAL directly. v4l2-relayd runs a GStreamer
   # icamerasrc pipeline and feeds a v4l2loopback device ("Intel IPU7 Camera")

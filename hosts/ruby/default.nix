@@ -84,6 +84,10 @@
 
   boot.kernelParams = [ "pcie_aspm.policy=powersupersave" ];
   boot.extraModprobeConfig = "options snd_hda_intel power_save=1";
+  boot.kernel.sysctl = {
+    "vm.dirty_writeback_centisecs" = 1500;
+    "kernel.nmi_watchdog" = 0;
+  };
 
   networking.networkmanager.wifi.powersave = false;
 
@@ -126,7 +130,10 @@
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
 
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
-    ACTION=="add|change", SUBSYSTEM=="pci", ATTR{class}=="0x028000", ATTR{power/control}="on"
     ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
+
+    # SVP7500 camera bridge: firmware used to wedge on autosuspend resume;
+    # set back to "on" if the camera or face unlock stops enumerating.
+    ACTION=="add|change", SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="2", ATTR{power/control}="auto"
   '';
 }

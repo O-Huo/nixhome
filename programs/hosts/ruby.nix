@@ -4,6 +4,7 @@
     pkgs.teams-for-linux
     pkgs.google-cloud-sdk
     pkgs.librepods
+    pkgs.powertop
   ];
 
   wayland.windowManager.niri.settings = {
