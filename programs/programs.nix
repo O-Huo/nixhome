@@ -23,6 +23,8 @@
     ./thunderbird
   ];
 
+  programs.btop.enable = true;
+
   home.packages = [
     pkgs.gnupg
     pkgs.tree
@@ -31,7 +33,6 @@
     pkgs.nix-output-monitor
     pkgs.ripgrep
     pkgs.cachix
-    pkgs.btop
     pkgs.codex
     pkgs.pciutils
     # pkgs.claude-code
