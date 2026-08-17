@@ -18,11 +18,6 @@
     "${inputs.nixos-hardware}/common/pc/ssd"
   ];
 
-  # We need at least 7.0 to have a working mic
-  boot.kernelPackages = lib.mkIf (lib.versionOlder pkgs.linux.version "7.0") (
-    lib.mkDefault pkgs.linuxPackages_latest
-  );
-
   hardware.ipu7 = {
     enable = true;
     platform = "ipu75xa";
