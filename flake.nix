@@ -42,10 +42,6 @@
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
-    starship-jj = {
-      url = "gitlab:lanastara_foss/starship-jj";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     intel-lpmd-flake = {
       url = "github:dmfrpro/intel-lpmd-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -62,7 +58,6 @@
       nur,
       catppuccin,
       nixos-hardware,
-      starship-jj,
       ...
     }@inputs:
     let
@@ -154,7 +149,6 @@
             extraSpecialArgs = {
               inherit inputs isHeadless;
               isLinux = pkgs.stdenv.isLinux;
-              starship-jj = starship-jj.packages.${pkgs.system}.default;
             };
           };
         };
@@ -186,7 +180,6 @@
             inherit inputs;
             isLinux = false;
             isHeadless = false;
-            starship-jj = starship-jj.packages.aarch64-darwin.default;
           };
         };
       };

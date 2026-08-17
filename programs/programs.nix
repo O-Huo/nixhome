@@ -2,7 +2,6 @@
   pkgs,
   config,
   lib,
-  starship-jj,
   isHeadless ? false,
   ...
 }:
@@ -25,7 +24,6 @@
   ];
 
   home.packages = [
-    starship-jj
     pkgs.gnupg
     pkgs.tree
     pkgs.yubikey-manager
