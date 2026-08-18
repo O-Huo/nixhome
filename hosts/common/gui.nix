@@ -83,6 +83,22 @@ in
   services.colord.enable = true;
   services.pcscd.enable = true;
 
+  services.udisks2.enable = true;
+  services.gvfs.enable = true;
+
+  environment.systemPackages = [ pkgs.udiskie ];
+  systemd.user.services.udiskie = {
+    description = "udiskie removable media automounter";
+    wantedBy = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.udiskie}/bin/udiskie --automount --notify --tray";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
+
   programs.steam = {
     enable = withNvidia;
   };
