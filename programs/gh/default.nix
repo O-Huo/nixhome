@@ -12,6 +12,7 @@
       pull.rebase = false;
     };
     ignores = [
+      ".env"
       ".venv/"
       ".envrc"
       ".direnv/"
