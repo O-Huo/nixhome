@@ -14,7 +14,7 @@
         output = {
           _args = [ "eDP-1" ];
           scale = 1.5;
-          variable-refresh-rate = { };
+          # variable-refresh-rate = { };
           position._props = {
             x = 320;
             y = 1440;
