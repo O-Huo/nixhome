@@ -129,6 +129,27 @@ in {
         open-floating = true;
       };
       _children = [
+        { workspace._args = ["browser"]; }
+        { workspace._args = ["terminal"]; }
+        { workspace._args = ["im"]; }
+        {
+          window-rule = {
+            match._props.app-id = "^(firefox|thunderbird)$";
+            open-on-workspace = "browser";
+          };
+        }
+        {
+          window-rule = {
+            match._props.app-id = "^Alacritty$";
+            open-on-workspace = "terminal";
+          };
+        }
+        {
+          window-rule = {
+            match._props.app-id = "(?i)^(slack|signal|org\\.telegram\\.desktop|teams-for-linux)$";
+            open-on-workspace = "im";
+          };
+        }
         { spawn-at-startup._args = ["fcitx5" "-d"]; }
         { spawn-at-startup._args = ["blueman-applet"]; }
         { spawn-at-startup._args = ["nm-applet" "--indicator"]; }
