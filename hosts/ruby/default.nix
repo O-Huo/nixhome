@@ -54,12 +54,6 @@
     };
     keyboards.realforce = {
       devices = [ "/dev/input/by-id/usb-Topre_REALFORCE_87_US-event-kbd" ];
-      # kanata's uinput device defaults to bus i8042, which libinput's shipped
-      # "MatchBus=ps2 -> AttrKeyboardIntegration=internal" quirk tags as the
-      # built-in keyboard. libinput pairs the internal keyboard with the lid
-      # switch, so a keypress while the lid reads closed is taken as proof the
-      # switch is stuck and it forces the lid open -- relighting the internal
-      # panel under a closed lid. Announce this external board as what it is.
       extraDefCfg = ''
         linux-output-device-name "kanata realforce"
         linux-output-device-bus-type USB
@@ -75,8 +69,6 @@
     };
   };
 
-  # brightnessctl's rules chgrp the backlight to "video" and make it group-writable;
-  # without them /sys/class/backlight/intel_backlight/brightness is root-only.
   environment.systemPackages = [
     pkgs.brightnessctl
   ];
@@ -93,8 +85,6 @@
 
   services.intel-lpmd = {
     enable = true;
-    # Panther Lake config with CachyOS's intel-lpmd@9c8739c applied:
-    # Balanced/Powersaver use auto LPM instead of force-off.
     config.custom = {
       filename = "intel_lpmd_config_F6_M204.xml";
       content =
@@ -107,6 +97,13 @@
 
   services.thermald.configFile = ./thermal-conf.xml;
 
+  powerManagement.resumeCommands = ''
+    sleep 2
+    ${pkgs.bluez}/bin/bluetoothctl power off
+    sleep 1
+    ${pkgs.bluez}/bin/bluetoothctl power on
+  '';
+
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
   services.logind.settings.Login = {
@@ -115,8 +112,6 @@
     IdleAction = "ignore";
   };
 
-  # power-profiles-daemon has no built-in AC/battery switching, so drive it from
-  # the AC adapter's udev events (and once at boot, when udev coldplugs it).
   systemd.services."power-profile@" = {
     description = "Set power profile to %I";
     serviceConfig = {

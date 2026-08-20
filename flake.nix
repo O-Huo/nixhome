@@ -38,6 +38,10 @@
       url = "github:noctalia-dev/noctalia-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";

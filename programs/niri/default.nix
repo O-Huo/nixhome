@@ -80,6 +80,7 @@ in {
     wl-clipboard
     xwayland-satellite
     hicolor-icon-theme
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
   ];
 
   xdg = {
@@ -96,6 +97,7 @@ in {
         "x-scheme-handler/https" = "firefox.desktop";
         "application/xhtml+xml" = "firefox.desktop";
         "application/pdf" = "firefox.desktop";
+        "x-scheme-handler/claude" = "claude-desktop.desktop";
       };
     };
     portal = {
