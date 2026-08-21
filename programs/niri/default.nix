@@ -24,11 +24,11 @@ let
 in
 {
   imports = [
-    inputs.noctalia.homeModules.default
     ./bindings.nix
   ];
   programs.noctalia = {
     enable = true;
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
     # Keep the session locker in its own supervised unit.  When Noctalia is
     # spawned by niri, applications launched through it inherit the same
     # transient scope; an OOM in one of those applications then kills the

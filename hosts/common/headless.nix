@@ -40,7 +40,7 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
-  services.tzupdate.enable = true;
+  services.automatic-timezoned.enable = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
