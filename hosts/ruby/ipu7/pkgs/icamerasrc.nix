@@ -20,15 +20,15 @@ let
     }
     .${ipuVariant};
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation (finalAttrs: {
   pname = "icamerasrc-${ipu-camera-hal.ipuVersion}";
-  version = "unstable-2025-12-26";
+  version = "20260629_2";
 
   src = fetchFromGitHub {
     owner = "intel";
     repo = "icamerasrc";
-    tag = "20251226_1140_191_PTL_PV_IoT";
-    hash = "sha256-BYURJfNz4D8bXbSeuWyUYnoifozFOq6rSfG9GBKVoHo=";
+    tag = finalAttrs.version;
+    hash = "sha256-AJCkHEXKQZUNxYCOdtGXimlKwDVjAR+2qnIT1nUkIPw=";
   };
 
   nativeBuildInputs = [
@@ -80,4 +80,4 @@ stdenv.mkDerivation {
     maintainers = [ ];
     platforms = [ "x86_64-linux" ];
   };
-}
+})

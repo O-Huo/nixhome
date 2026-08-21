@@ -30,7 +30,7 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "${ipuVersion}-camera-hal";
-  version = "20260629_1";
+  version = "20260629_2";
 
   src = fetchFromGitHub {
     owner = "intel";
@@ -38,6 +38,8 @@ stdenv.mkDerivation (finalAttrs: {
     rev = finalAttrs.version;
     hash = "sha256-uiVPQBMHUBP9ZFzX0QMimIpgbmvm7JLTkD588V07iGw=";
   };
+
+  patches = [ ../patches/camera-hal-kernel-7.2-cvs-bridge.patch ];
 
   __structuredAttrs = true;
   strictDeps = true;

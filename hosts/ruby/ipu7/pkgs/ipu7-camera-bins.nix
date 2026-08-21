@@ -9,7 +9,7 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "ipu7-camera-bins";
-  version = "20260629_1";
+  version = "20260629_2";
 
   src = fetchFromGitHub {
     repo = "ipu7-camera-bins";

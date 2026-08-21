@@ -2,36 +2,20 @@
   lib,
   stdenv,
   fetchFromGitHub,
-  fetchpatch,
   kernel,
   kernelModuleMakeFlags,
 }:
 
 stdenv.mkDerivation {
   pname = "ipu7-drivers";
-  version = "0-unstable-2026-06-30";
+  version = "0-unstable-2026-08-12";
 
   src = fetchFromGitHub {
     owner = "intel";
     repo = "ipu7-drivers";
-    rev = "ba5db745b26e54abbe459e1a38ff1d22d0fe0caa";
-    hash = "sha256-WvFsUhAHvQGz7SZ+MZgznCIO3B1wK/Tnfcmvlegyg+E=";
+    rev = "495acc90feb09d8008c0a6228fb8bb4c6415ca62";
+    hash = "sha256-a2hIJ4wMCHQeDb4gp+5pjLizJ/CCfA0JivVDWeqB4vY=";
   };
-
-  patches = [
-    (fetchpatch {
-      name = "psys-register-bus-before-adding-the-psys-device.patch";
-      # https://github.com/intel/ipu7-drivers/pull/87
-      url = "https://github.com/intel/ipu7-drivers/commit/77e3a0065697314cc7437a6eefd7e0d36ab06a4b.patch";
-      hash = "sha256-9wz+t4w94ymx4Ro634mIgRNAhaPj1Di514h2KRBljMU=";
-    })
-    (fetchpatch {
-      name = "guard-ipu7_dir-for-in-tree-core-builds.patch";
-      # https://github.com/intel/ipu7-drivers/pull/88
-      url = "https://github.com/intel/ipu7-drivers/commit/61ace27b1409a15a7e22f959277c256690f10a31.patch";
-      hash = "sha256-7UYUUqRXOLAmGNX/ymfnFjow0Xajxf3GC+ne98nBdDo=";
-    })
-  ];
 
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
