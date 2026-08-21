@@ -19,7 +19,18 @@
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="input", KERNEL=="input[0-9]*", ENV{ID_INPUT_MOUSE}=="1", RUN+="${pkgs.coreutils}/bin/chgrp input /sys%p/inhibited", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys%p/inhibited"
   '';
-  users.users.aoli.extraGroups = [ "input" ];
+  # gamemode: required for the renice configured in gui.nix to apply.
+  users.users.aoli.extraGroups = [
+    "input"
+    "gamemode"
+  ];
+
+  # sched-ext userspace scheduler tuned for gaming/interactivity; the CachyOS
+  # kernel ships sched-ext support, and lavd is what CachyOS defaults to.
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
   networking.firewall.allowedTCPPorts = [ 8211 ];
   networking.firewall.allowedUDPPorts = [ 8211 ];
 }

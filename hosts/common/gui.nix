@@ -86,7 +86,10 @@ in
   services.udisks2.enable = true;
   services.gvfs.enable = true;
 
-  environment.systemPackages = [ pkgs.udiskie ];
+  environment.systemPackages = [
+    pkgs.udiskie
+  ]
+  ++ pkgs.lib.optionals withNvidia [ pkgs.mangohud ];
   systemd.user.services.udiskie = {
     description = "udiskie removable media automounter";
     wantedBy = [ "graphical-session.target" ];
@@ -101,5 +104,15 @@ in
 
   programs.steam = {
     enable = withNvidia;
+  };
+
+  # Opt in per game with `gamemoderun %command%` in its Steam launch options.
+  programs.gamemode = {
+    enable = withNvidia;
+    settings.general = {
+      renice = 10;
+      # xdg-screensaver is X11-only; under niri it just logs errors.
+      inhibit_screensaver = 0;
+    };
   };
 }
