@@ -92,7 +92,6 @@
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) [
-    pkgs.winboat
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
