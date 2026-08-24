@@ -8,7 +8,6 @@
     ./window.nix
     ./cmp.nix
     ./languages
-    ./copilot.nix
     ./sleuth.nix
   ];
 
