@@ -1,4 +1,10 @@
-{ pkgs, lib, inputs, config, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  config,
+  ...
+}:
 let
   mouse-inhibit = pkgs.writeShellScriptBin "mouse-inhibit" ''
     for dev in /sys/class/input/input*; do
@@ -15,14 +21,21 @@ let
     ${lib.getExe mouse-inhibit} 0
     ${lib.getExe pkgs.niri} msg action power-on-monitors
   '';
-in {
+in
+{
   imports = [
     inputs.noctalia.homeModules.default
     ./bindings.nix
   ];
   programs.noctalia = {
     enable = true;
+    # Keep the session locker in its own supervised unit.  When Noctalia is
+    # spawned by niri, applications launched through it inherit the same
+    # transient scope; an OOM in one of those applications then kills the
+    # locker and leaves niri securely (but irrecoverably) locked.
+    systemd.enable = true;
     settings = {
+      shell.launch_apps_as_systemd_services = true;
       location = {
         auto_locate = true;
       };
@@ -34,7 +47,12 @@ in {
       bar.default = {
         position = "top";
         margin_ends = 0;
-        start = [ "launcher" "wallpaper" "workspaces" "taskbar" ];
+        start = [
+          "launcher"
+          "wallpaper"
+          "workspaces"
+          "taskbar"
+        ];
       };
       theme = {
         source = "builtin";
@@ -51,12 +69,12 @@ in {
         behavior = {
           lock = {
             enabled = true;
-            timeout = 120;  # Reduce screen lock timeout for battery saving
+            timeout = 120; # Reduce screen lock timeout for battery saving
             action = "lock";
           };
           screen-off = {
             enabled = true;
-            timeout = 150;  # Turn off display sooner
+            timeout = 150; # Turn off display sooner
             action = "command";
             command = "${screen-off}";
             resume_command = "${screen-on}";
@@ -65,6 +83,9 @@ in {
       };
     };
   };
+  # A plugin or helper being OOM-killed must not make systemd stop the shell
+  # while it owns the Wayland session lock.
+  systemd.user.services.noctalia.Service.OOMPolicy = "continue";
   home.pointerCursor = {
     enable = true;
     package = pkgs.bibata-cursors;
@@ -109,7 +130,6 @@ in {
     };
   };
 
-
   wayland.windowManager.niri = {
     enable = true;
 
@@ -124,16 +144,21 @@ in {
         default-column-width.proportion = 0.5;
       };
       switch-events = {
-        lid-close.spawn = ["noctalia" "msg" "session" "lock"];
+        lid-close.spawn = [
+          "noctalia"
+          "msg"
+          "session"
+          "lock"
+        ];
       };
       window-rule = {
         match._props.app-id = "^alacritty-yazi$";
         open-floating = true;
       };
       _children = [
-        { workspace._args = ["browser"]; }
-        { workspace._args = ["terminal"]; }
-        { workspace._args = ["im"]; }
+        { workspace._args = [ "browser" ]; }
+        { workspace._args = [ "terminal" ]; }
+        { workspace._args = [ "im" ]; }
         {
           window-rule = {
             match._props.app-id = "^(firefox|thunderbird)$";
@@ -152,10 +177,19 @@ in {
             open-on-workspace = "im";
           };
         }
-        { spawn-at-startup._args = ["fcitx5" "-d"]; }
-        { spawn-at-startup._args = ["blueman-applet"]; }
-        { spawn-at-startup._args = ["nm-applet" "--indicator"]; }
-        { spawn-at-startup._args = ["noctalia"]; }
+        {
+          spawn-at-startup._args = [
+            "fcitx5"
+            "-d"
+          ];
+        }
+        { spawn-at-startup._args = [ "blueman-applet" ]; }
+        {
+          spawn-at-startup._args = [
+            "nm-applet"
+            "--indicator"
+          ];
+        }
       ];
     };
   };
