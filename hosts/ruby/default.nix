@@ -127,6 +127,10 @@
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
 
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+    # The Intel CNVi adapter (PCI class 0280) loses connectivity after AC/dock
+    # removal when runtime power management is forced on. Keep it awake; the
+    # NetworkManager Wi-Fi power-saving setting above handles radio power use.
+    ACTION=="add|change", SUBSYSTEM=="pci", ATTR{class}=="0x028000", ATTR{power/control}="on"
     ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
 
     # SVP7500 camera bridge: firmware used to wedge on autosuspend resume;
