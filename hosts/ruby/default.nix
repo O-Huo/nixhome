@@ -83,6 +83,9 @@
 
   networking.networkmanager.wifi.powersave = false;
 
+  services.resolved.enable = true;
+  networking.networkmanager.dns = "systemd-resolved";
+
   services.intel-lpmd = {
     enable = true;
     config.custom = {
@@ -96,13 +99,6 @@
   };
 
   services.thermald.configFile = ./thermal-conf.xml;
-
-  powerManagement.resumeCommands = ''
-    sleep 2
-    ${pkgs.bluez}/bin/bluetoothctl power off
-    sleep 1
-    ${pkgs.bluez}/bin/bluetoothctl power on
-  '';
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
@@ -127,14 +123,9 @@
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
 
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
-    # The Intel CNVi adapter (PCI class 0280) loses connectivity after AC/dock
-    # removal when runtime power management is forced on. Keep it awake; the
-    # NetworkManager Wi-Fi power-saving setting above handles radio power use.
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{class}=="0x028000", ATTR{power/control}="on"
     ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
 
-    # SVP7500 camera bridge: firmware used to wedge on autosuspend resume;
-    # set back to "on" if the camera or face unlock stops enumerating.
     ACTION=="add|change", SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="2", ATTR{power/control}="auto"
   '';
 }
