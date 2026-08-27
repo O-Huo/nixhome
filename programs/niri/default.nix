@@ -29,10 +29,6 @@ in
   programs.noctalia = {
     enable = true;
     package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
-    # Keep the session locker in its own supervised unit.  When Noctalia is
-    # spawned by niri, applications launched through it inherit the same
-    # transient scope; an OOM in one of those applications then kills the
-    # locker and leaves niri securely (but irrecoverably) locked.
     systemd.enable = true;
     settings = {
       shell.launch_apps_as_systemd_services = true;
@@ -83,8 +79,6 @@ in
       };
     };
   };
-  # A plugin or helper being OOM-killed must not make systemd stop the shell
-  # while it owns the Wayland session lock.
   systemd.user.services.noctalia.Service.OOMPolicy = "continue";
   home.pointerCursor = {
     enable = true;

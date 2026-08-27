@@ -1,4 +1,10 @@
-{ pkgs, inputs, ... }: {
+{
+  pkgs,
+  inputs,
+  lib,
+  ...
+}:
+{
   imports = [
     (import ../common {
       inherit pkgs inputs;
@@ -11,11 +17,11 @@
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "octal";
 
-  # Build aarch64 derivations through qemu-user.
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_cachyos-lts;
+  hardware.nvidia.package = lib.mkForce pkgs.nvidia_cachyos-lts;
+
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  # Let the session (noctalia idle via mouse-inhibit) suppress mouse input while
-  # monitors are powered off, so only the keyboard wakes the screen.
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="input", KERNEL=="input[0-9]*", ENV{ID_INPUT_MOUSE}=="1", RUN+="${pkgs.coreutils}/bin/chgrp input /sys%p/inhibited", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys%p/inhibited"
   '';
