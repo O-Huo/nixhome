@@ -16,7 +16,7 @@
     ./yazi
   ]
   ++ lib.optionals (!isHeadless) [
-    ./vscode/vscode.nix
+    # ./vscode/vscode.nix
     ./browserpass
     ./alacritty
     ./zed
@@ -87,8 +87,8 @@
     pkgs.zed-editor
     pkgs.alacritty
     pkgs.browserpass
-    pkgs.vscode
-    pkgs.texliveFull
+    # pkgs.vscode
+    # pkgs.texliveFull
   ]
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
   ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) [
