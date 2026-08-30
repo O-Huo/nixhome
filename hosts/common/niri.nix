@@ -20,6 +20,7 @@
     enable = true;
     settings = {
       session.default = "niri";
+      idle.timeout = 150;
       cursor = {
         theme = "Bibata-Modern-Classic";
         size = 24;
