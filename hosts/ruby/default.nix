@@ -84,6 +84,7 @@
   networking.networkmanager.wifi.powersave = false;
 
   services.resolved.enable = true;
+  services.resolved.settings.Resolve.ResolveUnicastSingleLabel = true;
   networking.networkmanager.dns = "systemd-resolved";
 
   services.intel-lpmd = {

@@ -529,6 +529,7 @@
         "noctalia-greeter": "noctalia-greeter",
         "nur": "nur",
         "quickshell": "quickshell",
+        "tether": "tether",
         "vscode-server": "vscode-server"
       }
     },
@@ -561,6 +562,26 @@
         "owner": "nix-systems",
         "ref": "future-26.11",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "tether": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788121206,
+        "narHash": "sha256-ysm5g+h4cq+LrLvm+kXRgKDSjcUiCBMoFE/JzI4WegQ=",
+        "owner": "zackb",
+        "repo": "tether",
+        "rev": "1177bf0430e87def7d701aac145f7696ddec3ef6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zackb",
+        "repo": "tether",
         "type": "github"
       }
     },

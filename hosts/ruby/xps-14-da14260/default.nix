@@ -123,4 +123,7 @@
 
   # Allows for updating firmware via `fwupdmgr`.
   services.fwupd.enable = true;
+
+  systemd.services.fwupd-refresh.enable = false;
+  systemd.timers.fwupd-refresh.enable = false;
 }
