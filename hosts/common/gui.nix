@@ -10,7 +10,6 @@ in
 {
   imports = [
     ./niri.nix
-    inputs.tether.nixosModules.default
   ];
 
   boot.kernelPackages = kernelPackages;
@@ -67,18 +66,6 @@ in
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
-
-  programs.tether = {
-    enable = true;
-    wifi = {
-      enable = true;
-      openFirewall = true;
-    };
-    bluetooth = {
-      enable = true;
-      adapters = [ "hci0" ];
-    };
-  };
 
   # https://wiki.nixos.org/wiki/NVIDIA
   hardware.graphics.enable = true;
