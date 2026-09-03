@@ -33,18 +33,18 @@
       {
         output = {
           _args = [ "DP-1" ];
-          scale = 1.5;
+          scale = 1.25;
           position._props = {
             x = 0;
             y = 0;
           };
-          mode = "3840x2160@120";
+          mode = "3840x2160@59.997";
         };
       }
       {
         output = {
           _args = [ "ASUSTek COMPUTER INC PG32UCDM S3LMQS114886" ];
-          scale = 1.5;
+          scale = 1.25;
           # max-bpc = 10;
           variable-refresh-rate = { };
           mode = "3840x2160@240.016";
