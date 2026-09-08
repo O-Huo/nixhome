@@ -18,6 +18,11 @@
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
   networking.hostName = "ruby";
 
+  programs.firefox = {
+    enable = true;
+    preferences."media.webrtc.camera.allow-pipewire" = false;
+  };
+
   virtualisation.docker.enable = lib.mkForce false;
 
   programs._1password.enable = true;
