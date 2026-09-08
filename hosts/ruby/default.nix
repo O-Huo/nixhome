@@ -106,6 +106,7 @@
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "lock";
+    HandleLidSwitchDocked = "ignore";
     IdleAction = "ignore";
   };
 
@@ -126,6 +127,9 @@
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{class}=="0x028000", ATTR{power/control}="on"
     ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
+
+    ACTION=="add|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
+    ACTION=="add|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0853", ATTR{idProduct}=="0145", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
 
     ACTION=="add|change", SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="2", ATTR{power/control}="auto"
   '';
