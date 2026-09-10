@@ -44,13 +44,14 @@
       revset-aliases = {
         "immutable_heads()" = "present(trunk()) | tags()";
       };
-      # Start a fresh working change after publishing @. The extra protection
-      # applies only during this command; remote commits remain editable afterward.
-      aliases.push = [
-        "--config"
-        ''revset-aliases."immutable_heads()"="present(trunk()) | tags() | remote_bookmarks()"''
-        "git"
-        "push"
+      aliases.push = [ "git" "push" ];
+      # Publishing @ starts a new working change, including pushes from jjui.
+      # Outside git push, remote bookmarks retain the normal mutability rules.
+      "--scope" = [
+        {
+          "--when".commands = [ "git push" ];
+          revset-aliases."immutable_heads()" = "present(trunk()) | tags() | remote_bookmarks()";
+        }
       ];
       ui = {
         always-allow-large-revsets = true;
