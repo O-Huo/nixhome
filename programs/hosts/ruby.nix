@@ -32,7 +32,7 @@
       }
       {
         output = {
-          _args = [ "DP-1" ];
+          _args = [ "LG Electronics LG HDR 4K 607INLV0R112" ];
           scale = 1.25;
           position._props = {
             x = 0;

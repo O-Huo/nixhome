@@ -44,6 +44,14 @@
       revset-aliases = {
         "immutable_heads()" = "present(trunk()) | tags()";
       };
+      # Start a fresh working change after publishing @. The extra protection
+      # applies only during this command; remote commits remain editable afterward.
+      aliases.push = [
+        "--config"
+        ''revset-aliases."immutable_heads()"="present(trunk()) | tags() | remote_bookmarks()"''
+        "git"
+        "push"
+      ];
       ui = {
         always-allow-large-revsets = true;
       };
