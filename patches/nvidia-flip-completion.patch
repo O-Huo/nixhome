@@ -1,0 +1,945 @@
+diff --git a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+index 62986c40f5..460ed01f8f 100644
+--- a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
++++ b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+@@ -1216,6 +1216,134 @@
+     timer->cancel = NV_TRUE;
+ }
+ 
++/* Counted events use preallocated queue items, including when signaled in ISR. */
++struct nvkms_event_t {
++    nv_kthread_q_item_t item;
++    spinlock_t lock;
++    NvU64 pending;
++    NvBool queued;
++    NvBool enabled;
++    /* cancel and ref_ptr->ptr are protected by nvkms_lock. */
++    NvBool cancel;
++    nvkms_timer_proc_t *proc;
++    struct nvkms_ref_ptr *ref_ptr;
++    NvU32 dataU32;
++};
++
++static void nvkms_destroy_event(struct nvkms_event_t *event)
++{
++    nvkms_dec_ref(event->ref_ptr);
++    nvkms_free(event, sizeof(*event));
++}
++
++static void nvkms_event_callback(void *arg)
++{
++    struct nvkms_event_t *event = arg;
++    unsigned long flags;
++    NvU64 count;
++
++    nvkms_read_lock_pm_lock();
++    down(&nvkms_lock);
++
++    spin_lock_irqsave(&event->lock, flags);
++    /* Bound each batch so a busy channel yields to other queued work. */
++    count = NV_MIN(event->pending, 64);
++    event->pending -= count;
++    spin_unlock_irqrestore(&event->lock, flags);
++
++    while (count-- && !event->cancel && event->ref_ptr->ptr != NULL) {
++        event->proc(event->ref_ptr->ptr, event->dataU32);
++    }
++
++    spin_lock_irqsave(&event->lock, flags);
++    if (event->pending != 0 && !event->cancel) {
++        /*
++         * Keep queued set until the last batch finishes. A signal racing with
++         * this callback either joins that batch or schedules the next one.
++         * nv_kthread_q allows an item to reschedule itself.
++         */
++        nvkms_queue_work(&nvkms_kthread_q, &event->item);
++    } else {
++        event->queued = NV_FALSE;
++    }
++    spin_unlock_irqrestore(&event->lock, flags);
++
++    if (event->cancel) {
++        nvkms_destroy_event(event);
++    }
++
++    up(&nvkms_lock);
++    nvkms_read_unlock_pm_lock();
++}
++
++nvkms_event_handle_t *nvkms_alloc_event(nvkms_timer_proc_t *proc,
++                                       struct nvkms_ref_ptr *ref_ptr,
++                                       NvU32 dataU32)
++{
++    struct nvkms_event_t *event = nvkms_alloc(sizeof(*event), NV_TRUE);
++
++    if (event == NULL) {
++        return NULL;
++    }
++
++    event->proc = proc;
++    event->ref_ptr = ref_ptr;
++    event->dataU32 = dataU32;
++    nvkms_inc_ref(ref_ptr);
++    spin_lock_init(&event->lock);
++    nv_kthread_q_item_init(&event->item, nvkms_event_callback, event);
++    return event;
++}
++
++void nvkms_signal_event(nvkms_event_handle_t *event)
++{
++    unsigned long flags;
++
++    spin_lock_irqsave(&event->lock, flags);
++    if (!event->enabled) {
++        spin_unlock_irqrestore(&event->lock, flags);
++        return;
++    }
++    event->pending++;
++    if (!event->queued) {
++        event->queued = NV_TRUE;
++        nvkms_queue_work(&nvkms_kthread_q, &event->item);
++    }
++    spin_unlock_irqrestore(&event->lock, flags);
++}
++
++void nvkms_activate_event(nvkms_event_handle_t *event, NvU32 dataU32)
++{
++    unsigned long flags;
++
++    spin_lock_irqsave(&event->lock, flags);
++    WARN_ON(event->enabled);
++    event->dataU32 = dataU32;
++    event->enabled = NV_TRUE;
++    spin_unlock_irqrestore(&event->lock, flags);
++}
++
++void nvkms_free_event(nvkms_event_handle_t *event)
++{
++    unsigned long flags;
++    NvBool queued;
++
++    if (event == NULL) {
++        return;
++    }
++
++    /* The caller has stopped signalers and holds nvkms_lock. */
++    event->cancel = NV_TRUE;
++    spin_lock_irqsave(&event->lock, flags);
++    queued = event->queued;
++    spin_unlock_irqrestore(&event->lock, flags);
++
++    if (!queued) {
++        nvkms_destroy_event(event);
++    }
++    /* Otherwise the queued worker destroys it without calling proc. */
++}
++
+ NvBool nvkms_fd_is_nvidia_chardev(int fd)
+ {
+     struct file *filp = fget(fd);
+diff --git a/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h b/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
+index dc33314bd3..b70eac2150 100644
+--- a/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
++++ b/kernel-open/nvidia-modeset/nvidia-modeset-os-interface.h
+@@ -286,6 +286,25 @@
+  */
+ void nvkms_free_timer  (nvkms_timer_handle_t *handle);
+ 
++typedef struct nvkms_event_t nvkms_event_handle_t;
++
++/*
++ * Allocate a counted, reusable deferred callback. Allocation and destruction
++ * require the NVKMS lock. Each signal invokes proc once under that lock, in
++ * process context, unless the event is freed or ref_ptr is invalidated.
++ * Signaling is allocation-free and may be called from interrupt context.
++ * Stop and synchronize all signalers before freeing the event. Freeing cancels
++ * pending callbacks without waiting for the worker to acquire the NVKMS lock.
++ * A new event ignores signals until activated once under the NVKMS lock.
++ * Activation sets dataU32; ref_ptr and dataU32 remain fixed thereafter.
++ */
++nvkms_event_handle_t *nvkms_alloc_event(nvkms_timer_proc_t *proc,
++                                       struct nvkms_ref_ptr *ref_ptr,
++                                       NvU32 dataU32);
++void nvkms_signal_event(nvkms_event_handle_t *event);
++void nvkms_activate_event(nvkms_event_handle_t *event, NvU32 dataU32);
++void nvkms_free_event(nvkms_event_handle_t *event);
++
+ 
+ 
+ /*!
+diff --git a/src/nvidia/src/kernel/rmapi/event_api.c b/src/nvidia/src/kernel/rmapi/event_api.c
+index 2842469f99..b865d1dc21 100644
+--- a/src/nvidia/src/kernel/rmapi/event_api.c
++++ b/src/nvidia/src/kernel/rmapi/event_api.c
+@@ -26,6 +26,9 @@
+ #include "rmapi/resource_fwd_decls.h"
+ #include "vgpu/rpc.h"
+ #include "gpu/device/device.h"
++#include "gpu/disp/disp_channel.h"
++#include "gpu/disp/kern_disp.h"
++#include "gpu_mgr/gpu_mgr.h"
+ #include "core/locks.h"
+ #include "rmapi/rs_utils.h"
+ 
+@@ -41,6 +44,79 @@
+ static NV_STATUS _eventRpcForType(NvHandle hClient, NvHandle hObject);
+ static void eventSystemDequeueEventLatest(SystemEventQueueList *pQueue);
+ 
++// Display awaken notification traversal holds the display low-latency lock.
++// A channel may be shared by the GPUs of a device; lock them in instance order.
++static NvU32 _lockDisplayEventList(INotifier *pNotifier,
++                                 KernelDisplay **ppDisplays)
++{
++    DispChannel *pChannel = dynamicCast(pNotifier, DispChannel);
++    OBJGPU *pGpu;
++    NvU32 gpuMask, gpuInstance = 0, count = 0;
++
++    NV_ASSERT(pChannel != NULL);
++    gpuMask = gpumgrGetGpuMask(GPU_RES_GET_GPU(pChannel));
++    while ((pGpu = gpumgrGetNextGpu(gpuMask, &gpuInstance)) != NULL)
++    {
++        KernelDisplay *pDisplay = GPU_GET_KERNEL_DISPLAY(pGpu);
++        if (pDisplay != NULL)
++        {
++            kdispAcquireLowLatencyLock(&pDisplay->lowLatencyLock);
++            ppDisplays[count++] = pDisplay;
++        }
++    }
++    return count;
++}
++
++static void _unlockDisplayEventList(KernelDisplay **ppDisplays, NvU32 count)
++{
++    while (count != 0)
++        kdispReleaseLowLatencyLock(&ppDisplays[--count]->lowLatencyLock);
++}
++
++static void _publishDisplayEvent(INotifier *pNotifier,
++                                 PEVENTNOTIFICATION *ppList,
++                                 PEVENTNOTIFICATION pEvent)
++{
++    KernelDisplay *displays[GPUMGR_MAX_GPU_INSTANCES];
++    NvU32 count = _lockDisplayEventList(pNotifier, displays);
++    pEvent->Next = *ppList;
++    *ppList = pEvent;
++    _unlockDisplayEventList(displays, count);
++}
++
++static PEVENTNOTIFICATION _detachDisplayEvent(INotifier *pNotifier,
++                                             PEVENTNOTIFICATION *ppList,
++                                             NvHandle hClient, NvHandle hEvent)
++{
++    KernelDisplay *displays[GPUMGR_MAX_GPU_INSTANCES];
++    PEVENTNOTIFICATION *ppLink, detached = NULL;
++    NvU32 count = _lockDisplayEventList(pNotifier, displays);
++    NvU32 i;
++
++    // Consume pending native awaken bits while the old registration is still
++    // present. In particular, an idle channel's final notification must not be
++    // delivered to a replacement registration after a modeset.
++    for (i = 0; i < count; i++)
++    {
++        OBJGPU *pGpu = ENG_GET_GPU(displays[i]);
++        if (gpuIsGpuFullPower(pGpu) && !IS_DCE_CLIENT(pGpu))
++            kdispServiceAwakenIntr_HAL(pGpu, displays[i], NULL);
++    }
++
++    for (ppLink = ppList; *ppLink != NULL; ppLink = &(*ppLink)->Next)
++    {
++        if ((*ppLink)->hEventClient == hClient && (*ppLink)->hEvent == hEvent)
++        {
++            detached = *ppLink;
++            *ppLink = detached->Next;
++            detached->Next = NULL;
++            break;
++        }
++    }
++    _unlockDisplayEventList(displays, count);
++    return detached;
++}
++
+ NV_STATUS
+ eventapiConstruct_IMPL
+ (
+@@ -185,7 +261,13 @@
+         }
+ 
+         if (rmStatus == NV_OK)
+-            rmStatus = registerEventNotification(ppEventNotification,
++        {
++            INotifier *pNotifier = pEvent->pNotifierShare->pNotifier;
++            NvBool isDisplay = dynamicCast(pNotifier, DispChannel) != NULL;
++            PEVENTNOTIFICATION newEvent = NULL;
++
++            // Allocate and initialize before publishing to the ISR-visible list.
++            rmStatus = registerEventNotification(isDisplay ? &newEvent : ppEventNotification,
+                                                  pRsClient,
+                                                  pEvent->hNotifierResource,
+                                                  pResourceRef->hResource,
+@@ -193,6 +275,11 @@
+                                                  pResourceRef->externalClassId,
+                                                  pNv0050AllocParams->data,
+                                                  bUserOsEventHandle);
++            if (rmStatus == NV_OK && isDisplay)
++            {
++                _publishDisplayEvent(pNotifier, ppEventNotification, newEvent);
++            }
++        }
+     }
+ 
+     if (rmStatus != NV_OK)
+@@ -312,10 +399,24 @@
+             }
+         }
+ 
+-        unregisterEventNotification(ppEventNotification,
+-                          hEventClient,
+-                          hNotifierResource,
+-                          hEvent);
++        if (dynamicCast(pNotifier, DispChannel) != NULL)
++        {
++            PEVENTNOTIFICATION detached = _detachDisplayEvent(
++                staticCast(pNotifier, INotifier), ppEventNotification,
++                hEventClient, hEvent);
++
++            // No ISR can still reference the detached entry. Free outside locks.
++            if (detached != NULL)
++                unregisterEventNotification(&detached, hEventClient,
++                                            hNotifierResource, hEvent);
++        }
++        else
++        {
++            unregisterEventNotification(ppEventNotification,
++                              hEventClient,
++                              hNotifierResource,
++                              hEvent);
++        }
+ 
+     }
+ 
+@@ -442,7 +543,18 @@
+         pNotifierShare->pNotifier = staticCast(pNotifier, INotifier);
+         pNotifierShare->hNotifierClient = hNotifierClient;
+         pNotifierShare->hNotifierResource = hNotifierResource;
+-        inotifySetNotificationShare(staticCast(pNotifier, INotifier), pNotifierShare);
++        if (dynamicCast(pNotifier, DispChannel) != NULL)
++        {
++            KernelDisplay *displays[GPUMGR_MAX_GPU_INSTANCES];
++            NvU32 count = _lockDisplayEventList(
++                staticCast(pNotifier, INotifier), displays);
++            inotifySetNotificationShare(staticCast(pNotifier, INotifier), pNotifierShare);
++            _unlockDisplayEventList(displays, count);
++        }
++        else
++        {
++            inotifySetNotificationShare(staticCast(pNotifier, INotifier), pNotifierShare);
++        }
+     }
+ 
+     if (ppNotifierShare)
+diff --git a/src/nvidia-modeset/include/nvkms-evo.h b/src/nvidia-modeset/include/nvkms-evo.h
+index 63cc8b9538..6fdfae8074 100644
+--- a/src/nvidia-modeset/include/nvkms-evo.h
++++ b/src/nvidia-modeset/include/nvkms-evo.h
+@@ -393,16 +393,28 @@
+                                              const NvU32 head,
+                                              const NvU32 layer,
+                                              struct nvkms_ref_ptr *ref_ptr,
++                                             const NvU32 eventId,
+                                              NVEvoModesetUpdateState
+                                                 *pModesetUpdate)
+ {
+     nvAssert((head < pDispEvo->pDevEvo->numHeads) &&
+                 (layer < pDispEvo->pDevEvo->head[head].numLayers));
+     pModesetUpdate->flipOccurredEvent[head].layer[layer].ref_ptr = ref_ptr;
++    pModesetUpdate->flipOccurredEvent[head].layer[layer].eventId = eventId;
+     pModesetUpdate->flipOccurredEvent[head].layer[layer].changed = TRUE;
+ }
+ 
+-void nvEvoPreModesetRegisterFlipOccurredEvent(NVDispEvoRec *pDispEvo,
++void nvEvoSetFlipOccurredEventHeads(NVDispEvoRec *pDispEvo,
++                                    NvU32 apiHead, NvU32 hwHeadsMask);
++
++NvBool nvEvoPrepareFlipOccurredEvent(NVDispEvoRec *pDispEvo,
++                                    NvU32 head, NvU32 layer,
++                                    struct nvkms_ref_ptr *ref_ptr);
++void nvEvoFreeFlipOccurredEvent(NVDevEvoRec *pDevEvo,
++                               NVEvoChannel *pChannel,
++                               NVEvoFlipEvent *pEvent);
++void nvEvoFreePreparedFlipOccurredEvents(NVDevEvoRec *pDevEvo);
++void nvEvoPreModesetActivateFlipOccurredEvent(NVDispEvoRec *pDispEvo,
+                                               const NvU32 head,
+                                               const NVEvoModesetUpdateState
+                                                     *pModesetUpdate);
+diff --git a/src/nvidia-modeset/include/nvkms-rm.h b/src/nvidia-modeset/include/nvkms-rm.h
+index 0385bf3f53..b360efecdd 100644
+--- a/src/nvidia-modeset/include/nvkms-rm.h
++++ b/src/nvidia-modeset/include/nvkms-rm.h
+@@ -47,7 +47,7 @@
+ 
+ NvBool nvRmRegisterCallback(const NVDevEvoRec *pDevEvo,
+                             NVOS10_EVENT_KERNEL_CALLBACK_EX *cb,
+-                            struct nvkms_ref_ptr *ref_ptr,
++                            void *arg,
+                             NvU32 parentHandle,
+                             NvU32 eventHandle,
+                             Callback5ArgVoidReturn func,
+diff --git a/src/nvidia-modeset/include/nvkms-types.h b/src/nvidia-modeset/include/nvkms-types.h
+index f0e917d3bf..956c7a27fd 100644
+--- a/src/nvidia-modeset/include/nvkms-types.h
++++ b/src/nvidia-modeset/include/nvkms-types.h
+@@ -412,6 +412,7 @@
+     struct {
+         struct _NVEvoModesetUpdateStateOneLayer {
+             struct nvkms_ref_ptr *ref_ptr;
++            NvU32 eventId;
+             NvBool changed;
+         } layer[NVKMS_MAX_LAYERS_PER_HEAD];
+     } flipOccurredEvent[NVKMS_MAX_HEADS_PER_DISP];
+@@ -466,6 +467,14 @@
+ } NVVblankSyncObjectRec;
+ 
+ /* EVO channel */
++typedef struct {
++    NVOS10_EVENT_KERNEL_CALLBACK_EX callback;
++    struct nvkms_ref_ptr *ref_ptr;
++    NvU32 handle;
++    NvU32 eventId;
++    nvkms_event_handle_t *work;
++} NVEvoFlipEvent;
++
+ typedef struct _NVEvoChannel {
+     NVEvoDma                    notifierDma;
+ 
+@@ -475,9 +484,8 @@
+ 
+     NVDmaBufferEvoRec           pb;
+ 
+-    NVOS10_EVENT_KERNEL_CALLBACK_EX completionNotifierEventCallback;
+-    const struct nvkms_ref_ptr *completionNotifierEventRefPtr;
+-    NvU32 completionNotifierEventHandle;
++    NVEvoFlipEvent *completionNotifierEvent;
++    NVEvoFlipEvent *preparedFlipOccurredEvent;
+ 
+     // On Turing, RM wants to be notified when the tearing mode changes.
+     NvBool oldTearingMode;
+@@ -1952,6 +1960,10 @@
+     NVDispEvoPtr pDispEvo;
+     NvU32 apiHead;
+     NvU32 layer;
++    NvU32 hwHeadsMask;
++    /* Low bits are reserved for the hardware head in deferred event IDs. */
++    NvU32 generation;
++    NvU32 pendingEvents[NVKMS_MAX_HEADS_PER_DISP];
+ } NVDispFlipOccurredEventDataEvoRec;
+ 
+ typedef struct _NVDispApiHeadStateEvoRec {
+diff --git a/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h b/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
+index dc33314bd3..b70eac2150 100644
+--- a/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
++++ b/src/nvidia-modeset/os-interface/include/nvidia-modeset-os-interface.h
+@@ -286,6 +286,25 @@
+  */
+ void nvkms_free_timer  (nvkms_timer_handle_t *handle);
+ 
++typedef struct nvkms_event_t nvkms_event_handle_t;
++
++/*
++ * Allocate a counted, reusable deferred callback. Allocation and destruction
++ * require the NVKMS lock. Each signal invokes proc once under that lock, in
++ * process context, unless the event is freed or ref_ptr is invalidated.
++ * Signaling is allocation-free and may be called from interrupt context.
++ * Stop and synchronize all signalers before freeing the event. Freeing cancels
++ * pending callbacks without waiting for the worker to acquire the NVKMS lock.
++ * A new event ignores signals until activated once under the NVKMS lock.
++ * Activation sets dataU32; ref_ptr and dataU32 remain fixed thereafter.
++ */
++nvkms_event_handle_t *nvkms_alloc_event(nvkms_timer_proc_t *proc,
++                                       struct nvkms_ref_ptr *ref_ptr,
++                                       NvU32 dataU32);
++void nvkms_signal_event(nvkms_event_handle_t *event);
++void nvkms_activate_event(nvkms_event_handle_t *event, NvU32 dataU32);
++void nvkms_free_event(nvkms_event_handle_t *event);
++
+ 
+ 
+ /*!
+diff --git a/src/nvidia-modeset/src/nvkms-evo.c b/src/nvidia-modeset/src/nvkms-evo.c
+index 600003f0ab..941d625bab 100644
+--- a/src/nvidia-modeset/src/nvkms-evo.c
++++ b/src/nvidia-modeset/src/nvkms-evo.c
+@@ -4781,18 +4781,9 @@
+     for (layer = 0; layer < pDevEvo->head[head].numLayers; layer++) {
+         NVEvoChannelPtr pChannel = pDevEvo->head[head].layer[layer];
+ 
+-        nvAssert((pChannel->completionNotifierEventHandle == 0) ||
+-                    (pChannel->completionNotifierEventRefPtr != NULL));
+-
+-        if (pChannel->completionNotifierEventHandle != 0) {
+-            nvRmApiFree(nvEvoGlobal.clientHandle,
+-                        pChannel->pb.channel_handle,
+-                        pChannel->completionNotifierEventHandle);
+-            nvFreeUnixRmHandle(&pDevEvo->handleAllocator,
+-                               pChannel->completionNotifierEventHandle);
+-            pChannel->completionNotifierEventHandle = 0;
+-            pChannel->completionNotifierEventRefPtr = NULL;
+-        }
++        nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel,
++                                   pChannel->completionNotifierEvent);
++        pChannel->completionNotifierEvent = NULL;
+     }
+ }
+ 
+@@ -4916,10 +4907,63 @@
+     return FALSE;
+ }
+ 
++void nvEvoSetFlipOccurredEventHeads(NVDispEvoRec *pDispEvo,
++                                    NvU32 apiHead, NvU32 hwHeadsMask)
++{
++    NVDispApiHeadStateEvoRec *pApiHeadState = &pDispEvo->apiHeadState[apiHead];
++    NvU32 layer;
++
++    ct_assert((NVKMS_MAX_HEADS_PER_DISP &
++               (NVKMS_MAX_HEADS_PER_DISP - 1)) == 0);
++
++    for (layer = 0; layer < ARRAY_LEN(pApiHeadState->flipOccurredEvent); layer++) {
++        NVDispFlipOccurredEventDataEvoRec *pEventData =
++            &pApiHeadState->flipOccurredEvent[layer].data;
++
++        if (pEventData->hwHeadsMask == hwHeadsMask) {
++            continue;
++        }
++
++        pEventData->hwHeadsMask = hwHeadsMask;
++        pEventData->generation += NVKMS_MAX_HEADS_PER_DISP;
++        nvkms_memset(pEventData->pendingEvents, 0,
++                     sizeof(pEventData->pendingEvents));
++    }
++}
++
+ static void
+-CompletionNotifierEventDeferredWork(void *dataPtr, NvU32 dataU32)
++CompletionNotifierEventDeferredWork(void *dataPtr, NvU32 eventId)
+ {
+     NVDispFlipOccurredEventDataEvoRec *pEventData = dataPtr;
++    const NvU32 headMask = NVKMS_MAX_HEADS_PER_DISP - 1;
++    const NvU32 eventHead = eventId & headMask;
++    NvU32 head;
++
++    /* Discard work queued before the hardware-head assignment changed. */
++    if ((eventId & ~headMask) != pEventData->generation ||
++        (pEventData->hwHeadsMask & NVBIT(eventHead)) == 0) {
++        return;
++    }
++
++    /*
++     * A merged display has one window channel per hardware head. The first
++     * channel's completion does not account for the other channel's buffer
++     * use. Deliver one API event only after every participating head reports
++     * completion. Keep per-head counts so delivered callbacks can be processed
++     * in either order without pairing two notifications from the same head.
++     * This requires one notification per participating head per flip.
++     *
++     * Deferred work runs with the NVKMS lock held.
++     */
++    pEventData->pendingEvents[eventHead]++;
++    FOR_EACH_EVO_HW_HEAD_IN_MASK(pEventData->hwHeadsMask, head) {
++        if (pEventData->pendingEvents[head] == 0) {
++            return;
++        }
++    }
++    FOR_EACH_EVO_HW_HEAD_IN_MASK(pEventData->hwHeadsMask, head) {
++        pEventData->pendingEvents[head]--;
++    }
+ 
+     nvSendFlipOccurredEventEvo(pEventData->pDispEvo, pEventData->apiHead,
+                                pEventData->layer);
+@@ -4928,14 +4972,89 @@
+ static void CompletionNotifierEvent(void *arg, void *pEventDataVoid,
+                                     NvU32 hEvent, NvU32 Data, NV_STATUS Status)
+ {
+-  (void) nvkms_alloc_timer_with_ref_ptr(
+-        CompletionNotifierEventDeferredWork, /* callback */
+-        arg, /* argument (this is a ref_ptr to NVDispFlipOccurredEventDataEvoRec) */
+-        0,   /* dataU32 */
+-        0);  /* timeout: schedule the work immediately */
+-}
+-
+-void nvEvoPreModesetRegisterFlipOccurredEvent(NVDispEvoRec *pDispEvo,
++    nvkms_signal_event(arg);
++}
++
++void nvEvoFreeFlipOccurredEvent(NVDevEvoRec *pDevEvo,
++                               NVEvoChannel *pChannel,
++                               NVEvoFlipEvent *pEvent)
++{
++    if (pEvent == NULL) {
++        return;
++    }
++
++    if (pEvent->handle != 0) {
++        /* Unregister before retiring the callback's work and storage. */
++        nvRmApiFree(nvEvoGlobal.clientHandle, pChannel->pb.channel_handle,
++                    pEvent->handle);
++        nvFreeUnixRmHandle(&pDevEvo->handleAllocator, pEvent->handle);
++    }
++    nvkms_free_event(pEvent->work);
++    nvFree(pEvent);
++}
++
++NvBool nvEvoPrepareFlipOccurredEvent(NVDispEvoRec *pDispEvo,
++                                    NvU32 head, NvU32 layer,
++                                    struct nvkms_ref_ptr *ref_ptr)
++{
++    NVDevEvoRec *pDevEvo = pDispEvo->pDevEvo;
++    NVEvoChannel *pChannel = pDevEvo->head[head].layer[layer];
++    NVEvoFlipEvent *pEvent;
++
++    if (pDispEvo->displayOwner != 0) {
++        return TRUE;
++    }
++
++    nvAssert(pChannel->preparedFlipOccurredEvent == NULL);
++    pEvent = nvCalloc(1, sizeof(*pEvent));
++    if (pEvent == NULL) {
++        return FALSE;
++    }
++    pEvent->ref_ptr = ref_ptr;
++    pEvent->work = nvkms_alloc_event(CompletionNotifierEventDeferredWork,
++                                    ref_ptr, 0);
++    if (pEvent->work == NULL) {
++        goto failed;
++    }
++
++    pEvent->handle = nvGenerateUnixRmHandle(&pDevEvo->handleAllocator);
++    if (!nvRmRegisterCallback(pDevEvo, &pEvent->callback, pEvent->work,
++                              pChannel->pb.channel_handle, pEvent->handle,
++                              CompletionNotifierEvent, 0)) {
++        nvFreeUnixRmHandle(&pDevEvo->handleAllocator, pEvent->handle);
++        pEvent->handle = 0;
++        goto failed;
++    }
++
++    /*
++     * The callback is registered but its work is disabled. Old channel updates
++     * observed during preparation cannot be credited to the new assignment.
++     */
++    pChannel->preparedFlipOccurredEvent = pEvent;
++    return TRUE;
++
++failed:
++    nvEvoLogDev(pDevEvo, EVO_LOG_ERROR,
++                "Failed to prepare flip completion for head %u layer %u",
++                head, layer);
++    nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel, pEvent);
++    return FALSE;
++}
++
++void nvEvoFreePreparedFlipOccurredEvents(NVDevEvoRec *pDevEvo)
++{
++    NvU32 head, layer;
++    for (head = 0; head < pDevEvo->numHeads; head++) {
++        for (layer = 0; layer < pDevEvo->head[head].numLayers; layer++) {
++            NVEvoChannel *pChannel = pDevEvo->head[head].layer[layer];
++            nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel,
++                                       pChannel->preparedFlipOccurredEvent);
++            pChannel->preparedFlipOccurredEvent = NULL;
++        }
++    }
++}
++
++void nvEvoPreModesetActivateFlipOccurredEvent(NVDispEvoRec *pDispEvo,
+                                               const NvU32 head,
+                                               const NVEvoModesetUpdateState
+                                                   *pModesetUpdate)
+@@ -4949,35 +5068,26 @@
+     }
+ 
+     for (layer = 0; layer < pDevEvo->head[head].numLayers; layer++) {
+-        NVEvoChannelPtr pChannel = pDevEvo->head[head].layer[layer];
++        NVEvoChannel *pChannel = pDevEvo->head[head].layer[layer];
+         const struct _NVEvoModesetUpdateStateOneLayer *pLayer =
+-             &pModesetUpdate->flipOccurredEvent[head].layer[layer];
++            &pModesetUpdate->flipOccurredEvent[head].layer[layer];
++        NVEvoFlipEvent *pEvent = pChannel->completionNotifierEvent;
+ 
+-        if (!pLayer->changed ||
+-                (pLayer->ref_ptr == NULL) ||
+-                (pLayer->ref_ptr == pChannel->completionNotifierEventRefPtr)) {
++        if (!pLayer->changed || pLayer->ref_ptr == NULL) {
+             continue;
+         }
+-
+-        nvAssert((pChannel->completionNotifierEventHandle == 0) &&
+-                    (pChannel->completionNotifierEventRefPtr == NULL));
+-
+-        pChannel->completionNotifierEventHandle =
+-            nvGenerateUnixRmHandle(&pDevEvo->handleAllocator);
+-
+-        if (!nvRmRegisterCallback(pDevEvo,
+-                                  &pChannel->completionNotifierEventCallback,
+-                                  pLayer->ref_ptr,
+-                                  pChannel->pb.channel_handle,
+-                                  pChannel->completionNotifierEventHandle,
+-                                  CompletionNotifierEvent,
+-                                  0)) {
+-            nvFreeUnixRmHandle(&pDevEvo->handleAllocator,
+-                               pChannel->completionNotifierEventHandle);
+-            pChannel->completionNotifierEventHandle = 0;
+-        } else {
+-            pChannel->completionNotifierEventRefPtr = pLayer->ref_ptr;
++        if (pEvent != NULL) {
++            nvAssert(pEvent->ref_ptr == pLayer->ref_ptr &&
++                     pEvent->eventId == pLayer->eventId);
++            continue;
+         }
++
++        pEvent = pChannel->preparedFlipOccurredEvent;
++        nvAssert(pEvent != NULL && pEvent->ref_ptr == pLayer->ref_ptr);
++        pEvent->eventId = pLayer->eventId;
++        pChannel->completionNotifierEvent = pEvent;
++        pChannel->preparedFlipOccurredEvent = NULL;
++        nvkms_activate_event(pEvent->work, pLayer->eventId);
+     }
+ }
+ 
+@@ -4995,35 +5105,15 @@
+     }
+ 
+     for (layer = 0; layer < pDevEvo->head[head].numLayers; layer++) {
+-        NVEvoChannelPtr pChannel = pDevEvo->head[head].layer[layer];
++        NVEvoChannel *pChannel = pDevEvo->head[head].layer[layer];
+         const struct _NVEvoModesetUpdateStateOneLayer *pLayer =
+-             &pModesetUpdate->flipOccurredEvent[head].layer[layer];
+-
+-        if (!pLayer->changed ||
+-                (pLayer->ref_ptr != NULL) ||
+-                (pChannel->completionNotifierEventHandle == 0)) {
+-
+-            /*
+-             * If the flip occurred event of this layer is updated to get
+-             * enabled (pLayer->ref_ptr != NULL) then that update should have
+-             * been already processed by
+-             * nvEvoPreModesetRegisterFlipOccurredEvent() and
+-             * pChannel->completionNotifierEventRefPtr == pLayer->ref_ptr.
+-             */
+-            nvAssert(!pLayer->changed ||
+-                        (pChannel->completionNotifierEventHandle == 0) ||
+-                        (pChannel->completionNotifierEventRefPtr ==
+-                            pLayer->ref_ptr));
+-            continue;
++            &pModesetUpdate->flipOccurredEvent[head].layer[layer];
++
++        if (pLayer->changed && pLayer->ref_ptr == NULL) {
++            nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel,
++                                       pChannel->completionNotifierEvent);
++            pChannel->completionNotifierEvent = NULL;
+         }
+-
+-        nvRmApiFree(nvEvoGlobal.clientHandle,
+-                    pChannel->pb.channel_handle,
+-                    pChannel->completionNotifierEventHandle);
+-        nvFreeUnixRmHandle(&pDevEvo->handleAllocator,
+-                           pChannel->completionNotifierEventHandle);
+-        pChannel->completionNotifierEventHandle = 0;
+-        pChannel->completionNotifierEventRefPtr = NULL;
+     }
+ }
+ 
+diff --git a/src/nvidia-modeset/src/nvkms-modeset.c b/src/nvidia-modeset/src/nvkms-modeset.c
+index f51f97bcf9..334ddce15e 100644
+--- a/src/nvidia-modeset/src/nvkms-modeset.c
++++ b/src/nvidia-modeset/src/nvkms-modeset.c
+@@ -2323,7 +2323,7 @@
+     const NVDevEvoRec *pDevEvo = pDispEvo->pDevEvo;
+ 
+     for (NvU32 head = 0; head < pDevEvo->numHeads; head++) {
+-        nvEvoPreModesetRegisterFlipOccurredEvent(pDispEvo, head,
++        nvEvoPreModesetActivateFlipOccurredEvent(pDispEvo, head,
+             modesetUpdateState);
+     }
+ 
+@@ -2623,6 +2623,7 @@
+                                   head,
+                                   layer,
+                                   NULL,
++                                  0,
+                                   &pWorkArea->modesetUpdateState);
+     }
+ }
+@@ -2670,6 +2671,10 @@
+         return;
+     }
+ 
++    if (nvDpyIdListIsEmpty(pProposedDisp->apiHead[apiHead].dpyIdList)) {
++        nvEvoSetFlipOccurredEventHeads(pDispEvo, apiHead, 0);
++    }
++
+     nvAssert(pWorkArea->sd[pDispEvo->displayOwner].
+                         apiHead[apiHead].oldActiveRmId == 0);
+ 
+@@ -3181,28 +3186,24 @@
+         return;
+     }
+ 
+-    /*
+-     * pDevEvo->apiHead[apiHead].numLayers is the number of layers which are
+-     * visible to nvkms clients, and that number should be less than or equal
+-     * to pDevEvo->head[proposedPrimaryHead].numLayers.
+-     *
+-     * If (pDevEvo->head[proposedPrimaryHead].numLayers >
+-     * pDevEvo->apiHead[apiHead].numLayers) then the extra per hardware-head
+-     * layers remain unused and there is no need to register the completion
+-     * notifier callback for those extra per hardware-head layers.
+-     */
++    nvEvoSetFlipOccurredEventHeads(pDispEvo, apiHead,
++                                   pProposedApiHead->hwHeadsMask);
+ 
+-    nvAssert(pDevEvo->head[proposedPrimaryHead].numLayers >=
+-                 pDevEvo->apiHead[apiHead].numLayers);
++    /* Register all heads of a merged display, but only client-visible layers. */
++    FOR_EACH_EVO_HW_HEAD_IN_MASK(pProposedApiHead->hwHeadsMask, head) {
++        nvAssert(pDevEvo->head[head].numLayers >=
++                     pDevEvo->apiHead[apiHead].numLayers);
+ 
+-    for (NvU32 layer = 0; layer <
+-            pDevEvo->apiHead[apiHead].numLayers; layer++) {
+-        nvEvoSetFlipOccurredEvent(pDispEvo,
+-                                  proposedPrimaryHead,
+-                                  layer,
+-                                  pApiHeadState->flipOccurredEvent[layer].
+-                                    ref_ptr,
+-                                  &pWorkArea->modesetUpdateState);
++        for (NvU32 layer = 0; layer <
++                pDevEvo->apiHead[apiHead].numLayers; layer++) {
++            nvEvoSetFlipOccurredEvent(pDispEvo,
++                                      head,
++                                      layer,
++                                      pApiHeadState->flipOccurredEvent[layer].ref_ptr,
++                                      pApiHeadState->flipOccurredEvent[layer].
++                                        data.generation | head,
++                                      &pWorkArea->modesetUpdateState);
++        }
+     }
+     pApiHeadState->hwHeadsMask = pProposedApiHead->hwHeadsMask;
+     pDpyEvo->apiHead = apiHead;
+@@ -3458,6 +3459,13 @@
+             pProposedDisp,
+             pWorkArea);
+ 
++        /*
++         * These channels are unregistered by the shutdown UPDATE below.
++         * Invalidate their queued callbacks even if the next modeset reuses
++         * exactly the same hardware heads.
++         */
++        nvEvoSetFlipOccurredEventHeads(pDispEvo, apiHead, 0);
++
+         foundIncompatibleHead = TRUE;
+     }
+ 
+@@ -4182,6 +4190,37 @@
+     return ret;
+ }
+ 
++static NvBool PrepareFlipOccurredEvents(
++    NVDevEvoRec *pDevEvo, const NVProposedModeSetHwState *pProposed)
++{
++    NVDispEvoRec *pDispEvo;
++    NvU32 dispIndex, apiHead, head, layer;
++
++    FOR_ALL_EVO_DISPLAYS(pDispEvo, dispIndex, pDevEvo) {
++        for (apiHead = 0; apiHead < pDevEvo->numApiHeads; apiHead++) {
++            const NVProposedModeSetStateOneApiHead *pProposedApiHead =
++                &pProposed->disp[dispIndex].apiHead[apiHead];
++
++            if (!pProposedApiHead->changed ||
++                nvDpyIdListIsEmpty(pProposedApiHead->dpyIdList)) {
++                continue;
++            }
++            FOR_EACH_EVO_HW_HEAD_IN_MASK(pProposedApiHead->hwHeadsMask, head) {
++                for (layer = 0; layer <
++                        pDevEvo->apiHead[apiHead].numLayers; layer++) {
++                    if (!nvEvoPrepareFlipOccurredEvent(pDispEvo, head, layer,
++                            pDispEvo->apiHeadState[apiHead].
++                                flipOccurredEvent[layer].ref_ptr)) {
++                        return FALSE;
++                    }
++                }
++            }
++        }
++    }
++    return TRUE;
++}
++
++
+ /*!
+  * Perform a modeset across the heads on the disps of the device.
+  *
+@@ -4261,6 +4300,12 @@
+         goto done;
+     }
+ 
++    /* Reserve disabled callbacks before changing modeset state. */
++    if (!PrepareFlipOccurredEvents(pDevEvo, pProposed)) {
++        ret = FALSE;
++        goto done;
++    }
++
+     /* From this point, we should not fail. */
+ 
+     /*
+@@ -4365,6 +4410,7 @@
+ 
+     /* fall through */
+ done:
++    nvEvoFreePreparedFlipOccurredEvents(pDevEvo);
+     ClearProposedModeSetHwState(pDevEvo, pProposed, committed);
+ 
+     /* If all heads are shut down, allow GC6. */
+diff --git a/src/nvidia-modeset/src/nvkms-rm.c b/src/nvidia-modeset/src/nvkms-rm.c
+index 7ad713bbdd..7fc6156d3f 100644
+--- a/src/nvidia-modeset/src/nvkms-rm.c
++++ b/src/nvidia-modeset/src/nvkms-rm.c
+@@ -1858,7 +1858,7 @@
+ 
+ NvBool nvRmRegisterCallback(const NVDevEvoRec *pDevEvo,
+                             NVOS10_EVENT_KERNEL_CALLBACK_EX *cb,
+-                            struct nvkms_ref_ptr *ref_ptr,
++                            void *arg,
+                             NvU32 parentHandle,
+                             NvU32 eventHandle,
+                             Callback5ArgVoidReturn func,
+@@ -1867,7 +1867,7 @@
+     NV0005_ALLOC_PARAMETERS allocEventParams = { 0 };
+ 
+     cb->func = func;
+-    cb->arg = ref_ptr;
++    cb->arg = arg;
+ 
+     allocEventParams.hParentClient = nvEvoGlobal.clientHandle;
+     allocEventParams.hClass        = NV01_EVENT_KERNEL_CALLBACK_EX;
+@@ -3085,17 +3085,12 @@
+ 
+     FreeImmediateChannel(pDevEvo, pChannel);
+ 
+-    if (pChannel->completionNotifierEventHandle != 0) {
+-
+-        nvRmApiFree(nvEvoGlobal.clientHandle,
+-                    pChannel->pb.channel_handle,
+-                    pChannel->completionNotifierEventHandle);
+-
+-        nvFreeUnixRmHandle(&pDevEvo->handleAllocator,
+-                           pChannel->completionNotifierEventHandle);
+-
+-        pChannel->completionNotifierEventHandle = 0;
+-    }
++    nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel,
++                               pChannel->completionNotifierEvent);
++    nvEvoFreeFlipOccurredEvent(pDevEvo, pChannel,
++                               pChannel->preparedFlipOccurredEvent);
++    pChannel->completionNotifierEvent = NULL;
++    pChannel->preparedFlipOccurredEvent = NULL;
+ 
+     if (pChannel->pb.control) {
+         if (nvRmApiUnmapMemory(nvEvoGlobal.clientHandle,

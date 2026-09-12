@@ -18,7 +18,19 @@
   networking.hostName = "octal";
 
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages_cachyos-lts;
-  hardware.nvidia.package = lib.mkForce pkgs.nvidia_cachyos-lts;
+  hardware.nvidia.package = lib.mkForce (
+    let
+      driver = pkgs.nvidia_cachyos-lts;
+    in
+    driver
+    // {
+      # Candidate fix for NVIDIA #801: wait for both hardware heads before
+      # reporting flip completion on high-refresh-rate merged displays.
+      open = driver.open.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ../../patches/nvidia-flip-completion.patch ];
+      });
+    }
+  );
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 

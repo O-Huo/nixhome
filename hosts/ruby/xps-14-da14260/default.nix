@@ -1,8 +1,8 @@
 # Adopted from nixos-hardware PR #1912 (cooparo/nixos-hardware,
 # dell/xps/14-da14260) with the hardware-ISP patch applied: the camera relay
-# uses icamerasrc (hardware ISP via the IPU7 camera HAL, nixpkgs PR #542085)
+# uses icamerasrc (hardware ISP via the upstream IPU7 camera HAL)
 # instead of libcamerasrc's software ISP. Drop this directory in favor of
-# inputs.nixos-hardware.nixosModules.dell-xps-14-da14260 once both PRs are
+# inputs.nixos-hardware.nixosModules.dell-xps-14-da14260 once that PR is
 # merged. The common/ modules are still imported from the nixos-hardware input.
 {
   lib,
@@ -22,6 +22,16 @@
     enable = true;
     platform = "ipu75xa";
   };
+
+  # The upstream HAL still needs the kernel 7.2 CVS bridge topology fix
+  # for this laptop's OV08F4 sensor.
+  nixpkgs.overlays = [
+    (final: prev: {
+      ipu75xa-camera-hal = prev.ipu75xa-camera-hal.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./camera-hal-kernel-7.2-cvs-bridge.patch ];
+      });
+    })
+  ];
 
   # hardware.ipu7 brings its own v4l2-relayd instance, but it creates the
   # loopback with too few buffers for full framerate; the hand-rolled relay
