@@ -9,7 +9,7 @@
   programs.atuin.enable = lib.mkDefault true;
   home = {
     username = "aoli";
-    homeDirectory = if (pkgs.stdenv.isDarwin) then "/Users/aoli" else "/home/aoli";
+    homeDirectory = if (pkgs.stdenv.hostPlatform.isDarwin) then "/Users/aoli" else "/home/aoli";
   };
 
   programs.git = {

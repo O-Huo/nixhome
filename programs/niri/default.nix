@@ -99,13 +99,13 @@ in
   ];
 
   xdg = {
-    enable = pkgs.stdenv.isLinux;
-    configFile."mimeapps.list" = lib.mkIf pkgs.stdenv.isLinux {
+    enable = pkgs.stdenv.hostPlatform.isLinux;
+    configFile."mimeapps.list" = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       force = true;
     };
-    mime.enable = pkgs.stdenv.isLinux;
+    mime.enable = pkgs.stdenv.hostPlatform.isLinux;
     mimeApps = {
-      enable = pkgs.stdenv.isLinux;
+      enable = pkgs.stdenv.hostPlatform.isLinux;
       defaultApplications = {
         "text/html" = "firefox.desktop";
         "x-scheme-handler/http" = "firefox.desktop";
@@ -116,7 +116,7 @@ in
       };
     };
     portal = {
-      enable = pkgs.stdenv.isLinux;
+      enable = pkgs.stdenv.hostPlatform.isLinux;
       extraPortals = [
         pkgs.xdg-desktop-portal-gnome
         pkgs.xdg-desktop-portal-gtk

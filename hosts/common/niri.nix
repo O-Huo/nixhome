@@ -16,7 +16,7 @@
     NIXHOME_PATH = builtins.toString ./../..;
   };
   services.gnome.gnome-keyring.enable = true;
-  programs.noctalia-greeter = {
+  services.displayManager.noctalia-greeter = {
     enable = true;
     settings = {
       session.default = "niri";

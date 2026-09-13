@@ -56,7 +56,7 @@ pkgs: with pkgs; {
       cargo
       protobuf
     ]
-    ++ lib.optionals stdenv.isLinux [
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       bpftrace
       perf
     ];

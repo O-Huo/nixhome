@@ -90,8 +90,8 @@
     # pkgs.vscode
     # pkgs.texliveFull
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) [
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) [
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
@@ -103,6 +103,6 @@
     pkgs.kdePackages.okular
     pkgs.usbutils
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isDarwin) [
   ];
 }

@@ -95,7 +95,7 @@
         builtins.replaceStrings
           [ "<BalancedDef>-1</BalancedDef>" "<PowersaverDef>-1</PowersaverDef>" ]
           [ "<BalancedDef>0</BalancedDef>" "<PowersaverDef>0</PowersaverDef>" ]
-          (builtins.readFile "${inputs.intel-lpmd-flake.packages.${pkgs.system}.default}/share/xml/intel_lpmd_config_F6_M204.xml");
+          (builtins.readFile "${inputs.intel-lpmd-flake.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/xml/intel_lpmd_config_F6_M204.xml");
     };
   };
 
