@@ -1,5 +1,6 @@
 {
   pkgs,
+  inputs,
   config,
   lib,
   isHeadless ? false,
@@ -89,7 +90,9 @@
     # pkgs.vscode
     # pkgs.texliveFull
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) (import ./gui-apps.nix {
+    inherit pkgs inputs;
+  })
   ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) [
     pkgs.gnupg
     pkgs.seahorse
