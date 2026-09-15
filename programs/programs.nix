@@ -33,7 +33,6 @@
     pkgs.nix-output-monitor
     pkgs.ripgrep
     pkgs.cachix
-    pkgs.codex
     pkgs.pciutils
     # pkgs.claude-code
     pkgs.nix-index
