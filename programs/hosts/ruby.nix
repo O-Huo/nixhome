@@ -1,5 +1,16 @@
 { pkgs, ... }:
 {
+  programs.noctalia.settings.shell.session.power.suspend =
+    "${pkgs.systemd}/bin/systemctl suspend-then-hibernate";
+
+  programs.noctalia.settings.idle.behavior.suspend = {
+    enabled = true;
+    timeout = 600;
+    # Noctalia restarts idle timers after the existing two-minute lock.
+    locked_timeout = 480;
+    action = "suspend";
+  };
+
   home.packages = [
     pkgs.teams-for-linux
     pkgs.google-cloud-sdk

@@ -37,6 +37,14 @@
 
   boot.initrd.systemd.enable = true;
 
+  # Keep hibernation images inside the encrypted root filesystem.
+  # The systemd initrd resumes using the swapfile location recorded in EFI.
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 64 * 1024;
+    }
+  ];
 
   # Swap Alt/Super and make Caps Lock an extra Ctrl.
   services.kanata = {
@@ -103,8 +111,14 @@
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
+  systemd.sleep.settings.Sleep = {
+    AllowHibernation = true;
+    AllowSuspendThenHibernate = true;
+    HibernateDelaySec = "10min";
+    HibernateOnACPower = false;
+  };
   services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
+    HandleLidSwitch = "suspend-then-hibernate";
     HandleLidSwitchExternalPower = "lock";
     HandleLidSwitchDocked = "ignore";
     IdleAction = "ignore";
