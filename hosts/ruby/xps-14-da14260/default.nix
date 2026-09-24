@@ -38,6 +38,27 @@
   # service below replaces it.
   services.v4l2-relayd.instances.ipu7.enable = false;
 
+  # Only the relay should open the raw IPU7 devices. Browsers can otherwise
+  # select /dev/video0 instead of the loopback and keep its buffers busy,
+  # preventing the camera HAL from starting. Remove uaccess before
+  # 73-seat-late.rules grants the logged-in user access.
+  services.udev.packages = [
+    (pkgs.writeTextFile {
+      name = "ipu7-camera-udev-rules";
+      destination = "/lib/udev/rules.d/71-ipu7-camera.rules";
+      text = ''
+        SUBSYSTEM=="media", DRIVERS=="intel-ipu7", MODE="0600", GROUP="root", TAG-="uaccess"
+        SUBSYSTEM=="video4linux", DRIVERS=="intel-ipu7", MODE="0600", GROUP="root", TAG-="uaccess"
+      '';
+    })
+  ];
+
+  # The HAL owns the physical sensor; PipeWire should expose the relay's
+  # processed V4L2 output instead of opening it again through libcamera.
+  services.pipewire.wireplumber.extraConfig."ipu7-camera" = {
+    "wireplumber.profiles".main."monitor.libcamera" = "disabled";
+  };
+
   # Intel CVS driver for Synaptics SVP7500 camera bridge (06CB:0701).
   # Without this the IPU7 camera stack does not enumerate even though the
   # kernel-side intel_ipu7 driver detects the sensor (OVTI08F4 / OV08F4).

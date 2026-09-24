@@ -101,6 +101,7 @@
     pkgs.nautilus
     pkgs.r2modman
     pkgs.dragon-drop
+    pkgs.ueberzugpp
     pkgs.rr
     pkgs.kdePackages.okular
     pkgs.usbutils

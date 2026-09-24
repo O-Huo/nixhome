@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
-  programs.noctalia.settings.shell.session.power.suspend =
-    "${pkgs.systemd}/bin/systemctl suspend-then-hibernate";
+  programs.noctalia.settings.shell.session.power.suspend = "${pkgs.systemd}/bin/systemctl suspend";
 
   programs.noctalia.settings.idle.behavior.suspend = {
     enabled = true;
