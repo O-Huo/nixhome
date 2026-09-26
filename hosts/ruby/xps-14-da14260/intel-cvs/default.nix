@@ -18,6 +18,10 @@ stdenv.mkDerivation {
 
   src = kernel.src;
 
+  # Keep the camera's wake IRQ from claiming the audio speaker-ID GPIO.
+  # Drop this backport once kernel.src contains the upstream fix.
+  patches = [ ./wake-irq-without-gpio.patch ];
+
   unpackPhase = ''
     runHook preUnpack
     tar -xaf "$src" --wildcards '*/drivers/media/i2c/cvs'

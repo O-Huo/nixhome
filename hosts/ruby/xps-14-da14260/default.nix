@@ -62,9 +62,8 @@
   # Intel CVS driver for Synaptics SVP7500 camera bridge (06CB:0701).
   # Without this the IPU7 camera stack does not enumerate even though the
   # kernel-side intel_ipu7 driver detects the sensor (OVTI08F4 / OV08F4).
-  # The patch removes a spurious IRQF_ONESHOT flag from a non-threaded IRQ
-  # handler that causes the bridge to wedge after brief idle periods.
-  # See: https://github.com/intel/vision-drivers/issues/37
+  # Backport the wake-IRQ fix so the camera does not claim the GPIO shared
+  # with the audio amplifiers and prevent the sound card from registering.
   boot.extraModulePackages = [
     (config.boot.kernelPackages.callPackage ./intel-cvs { })
     config.boot.kernelPackages.v4l2loopback
