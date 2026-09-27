@@ -1,0 +1,10 @@
+keys:
+  - &aoli age1angsf492jzsgxv00mqsfd4qapwd9h062a9p2wwevtycstsvq8aqsm0mdz3
+  - &ruby age1any2dnus9pur3xyyq0ztqchjeyje6mlj0j3nhyarfpumed0gy5rsj5uu9k
+
+creation_rules:
+  - path_regex: ^secrets/ruby\.yaml$
+    key_groups:
+      - age:
+          - *aoli
+          - *ruby

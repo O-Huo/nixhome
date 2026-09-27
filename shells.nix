@@ -2,6 +2,9 @@ pkgs: with pkgs; {
   default = mkShellNoCC {
     buildInputs = [
       nixfmt
+      sops
+      age
+      ssh-to-age
     ];
   };
 

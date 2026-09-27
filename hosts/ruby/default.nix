@@ -8,10 +8,35 @@
     ./hardware-configuration.nix
     ../common/aoli.nix
     inputs.intel-lpmd-flake.nixosModules.default
+    inputs.sops-nix.nixosModules.sops
   ];
 
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
-  networking.hostName = "ruby";
+  networking.hostName = "aoli-xps14";
+
+  services.gnome.gcr-ssh-agent.enable = false;
+
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.secrets.fleet-enroll-secret = {
+    sopsFile = ../../secrets/ruby.yaml;
+    restartUnits = [ "orbit.service" ];
+  };
+
+  services.orbit = {
+    enable = true;
+    fleetUrl = "https://fleet.incalmo.ai";
+    enrollSecretPath = config.sops.secrets.fleet-enroll-secret.path;
+    enableScripts = false;
+    desktop = {
+      enable = true;
+      package = pkgs.writeShellScriptBin "fleet-desktop" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        exec ${pkgs.fleet-desktop}/bin/fleet-desktop "$@"
+      '';
+    };
+  };
+  # Orbit uses sudo to launch Fleet Desktop as the logged-in user.
+  systemd.services.orbit.path = [ pkgs.sudo ];
 
   programs.firefox = {
     enable = true;
@@ -26,8 +51,6 @@
     # Required for browser-extension pairing and system-authentication unlock.
     polkitPolicyOwners = [ "aoli" ];
   };
-  # nixpkgs' firefox runs as ".firefox-wrapped", which is not on 1Password's
-  # built-in browser allowlist; Chrome ("chrome") is allowed by default.
   environment.etc."1password/custom_allowed_browsers" = {
     text = ''
       .firefox-wrapped
