@@ -7,6 +7,7 @@
     ./greeting.nix
     ./window.nix
     ./cmp.nix
+    ./difftastic
     ./languages
     ./sleuth.nix
   ];

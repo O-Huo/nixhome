@@ -23,16 +23,6 @@
     platform = "ipu75xa";
   };
 
-  # The upstream HAL still needs the kernel 7.2 CVS bridge topology fix
-  # for this laptop's OV08F4 sensor.
-  nixpkgs.overlays = [
-    (final: prev: {
-      ipu75xa-camera-hal = prev.ipu75xa-camera-hal.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [ ./camera-hal-kernel-7.2-cvs-bridge.patch ];
-      });
-    })
-  ];
-
   # hardware.ipu7 brings its own v4l2-relayd instance, but it creates the
   # loopback with too few buffers for full framerate; the hand-rolled relay
   # service below replaces it.
