@@ -20,7 +20,6 @@ let
     cargoHash = "sha256-VSlFlLa4knQ7bH8yFHSKTTtt1cQ76dstlCdWBAtkf1I=";
     # Avoid CPU-specific builds; Neovim supplies LuaJIT symbols at load time.
     env.RUSTFLAGS = lib.optionalString stdenv.hostPlatform.isDarwin "-C link-arg=-undefined -C link-arg=dynamic_lookup";
-    doCheck = false;
   };
   ext = stdenv.hostPlatform.extensions.sharedLibrary;
 in
@@ -28,6 +27,7 @@ vimUtils.buildVimPlugin {
   pname = "difftastic.nvim";
   inherit version src;
   dependencies = [ vimPlugins.nui-nvim ];
+  # The upstream loader expects these paths and cannot create links in the Nix store.
   preInstall = ''
     mkdir -p target/release
     ln -s ${nativeLibrary}/lib/libdifftastic_nvim${ext} target/release/libdifftastic_nvim${ext}
