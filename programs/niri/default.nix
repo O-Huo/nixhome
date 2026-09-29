@@ -33,6 +33,7 @@ in
     settings = {
       shell.launch_apps_as_systemd_services = true;
       shell.screenshot = {
+        annotate = true;
         save_to_file = false;
         copy_to_clipboard = true;
       };
