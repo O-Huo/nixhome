@@ -32,6 +32,10 @@ in
     systemd.enable = true;
     settings = {
       shell.launch_apps_as_systemd_services = true;
+      shell.screenshot = {
+        save_to_file = false;
+        copy_to_clipboard = true;
+      };
       location = {
         auto_locate = true;
       };
@@ -90,8 +94,6 @@ in
 
   home.packages = with pkgs; [
     mouse-inhibit
-    grim
-    slurp
     wl-clipboard
     xwayland-satellite
     hicolor-icon-theme

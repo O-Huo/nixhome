@@ -37,9 +37,9 @@
         "lock"
       ];
       "Super+Ctrl+S".spawn = [
-        "bash"
-        "-c"
-        "grim -g \"$(slurp -d)\" - | wl-copy"
+        "noctalia"
+        "msg"
+        "screenshot-region"
       ];
 
       "Mod+W".toggle-column-tabbed-display = { };
