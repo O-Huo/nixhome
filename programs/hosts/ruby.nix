@@ -50,6 +50,14 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  programs.noctalia.settings.lockscreen = {
+    lock_before_suspend = true;
+    blurred_desktop = false;
+    # Transitions display a desktop snapshot after the session is locked.
+    # Suspend can freeze that image and expose it briefly on resume.
+    transition = [ ];
+  };
+
   programs.noctalia.settings.shell.session.power.suspend = "${pkgs.systemd}/bin/systemctl suspend";
 
   programs.noctalia.settings.idle.behavior.suspend = {

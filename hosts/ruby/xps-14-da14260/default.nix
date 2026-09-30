@@ -23,6 +23,17 @@
     platform = "ipu75xa";
   };
 
+  # The HAL must follow the sensor -> Intel CVS -> IPU7 topology on kernel
+  # 7.2. Without this it parses "Intel CVS" as the sensor's I2C address and
+  # tries to open the nonexistent "ov08x40 S", failing with EPIPE.
+  nixpkgs.overlays = [
+    (final: prev: {
+      ipu75xa-camera-hal = prev.ipu75xa-camera-hal.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./camera-hal-kernel-7.2-cvs-bridge.patch ];
+      });
+    })
+  ];
+
   # hardware.ipu7 brings its own v4l2-relayd instance, but it creates the
   # loopback with too few buffers for full framerate; the hand-rolled relay
   # service below replaces it.
