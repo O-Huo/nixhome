@@ -19,7 +19,7 @@
           scale = 1.25;
           # max-bpc = 10;
           variable-refresh-rate = { };
-          mode = "3840x2160@240.016";
+          mode = "3840x2160@119.880";
         };
       }
     ];
