@@ -19,7 +19,7 @@ let
     done
   '';
 in
-lib.mkIf pkgs.stdenv.isLinux {
+lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   home.packages = [ (import ./package.nix pkgs) ];
 
   home.activation.thunderbirdUnifiedFolders = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, inputs, ... }: {
   # Used for backwards compatibility. Read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 6;
@@ -8,7 +8,7 @@
   # GUI apps are installed at the system level so nix-darwin creates proper
   # /Applications/Nix Apps aliases that Spotlight and Launchpad can index.
   environment.systemPackages =
-    (import ../../programs/gui-apps.nix pkgs)
+    (import ../../programs/gui-apps.nix { inherit pkgs inputs; })
     ++ [ (import ../../programs/thunderbird/package.nix pkgs) ]
     ++ (with pkgs; [
       jetbrains.idea

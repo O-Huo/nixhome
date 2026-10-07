@@ -1,4 +1,10 @@
-{ pkgs, lib, inputs, config, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  config,
+  ...
+}:
 let
   mouse-inhibit = pkgs.writeShellScriptBin "mouse-inhibit" ''
     for dev in /sys/class/input/input*; do
@@ -8,21 +14,29 @@ let
     done
   '';
   screen-off = pkgs.writeShellScript "screen-off" ''
-    ${lib.getExe pkgs.niri-unstable} msg action power-off-monitors
+    ${lib.getExe pkgs.niri} msg action power-off-monitors
     ${lib.getExe mouse-inhibit} 1
   '';
   screen-on = pkgs.writeShellScript "screen-on" ''
     ${lib.getExe mouse-inhibit} 0
-    ${lib.getExe pkgs.niri-unstable} msg action power-on-monitors
+    ${lib.getExe pkgs.niri} msg action power-on-monitors
   '';
-in {
+in
+{
   imports = [
-    inputs.noctalia.homeModules.default
     ./bindings.nix
   ];
   programs.noctalia = {
     enable = true;
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    systemd.enable = true;
     settings = {
+      shell.launch_apps_as_systemd_services = true;
+      shell.screenshot = {
+        annotate = true;
+        save_to_file = false;
+        copy_to_clipboard = true;
+      };
       location = {
         auto_locate = true;
       };
@@ -33,7 +47,13 @@ in {
       };
       bar.default = {
         position = "top";
-        start = [ "launcher" "wallpaper" "workspaces" "taskbar" ];
+        margin_ends = 0;
+        start = [
+          "launcher"
+          "wallpaper"
+          "workspaces"
+          "taskbar"
+        ];
       };
       theme = {
         source = "builtin";
@@ -50,12 +70,12 @@ in {
         behavior = {
           lock = {
             enabled = true;
-            timeout = 120;  # Reduce screen lock timeout for battery saving
+            timeout = 120; # Reduce screen lock timeout for battery saving
             action = "lock";
           };
           screen-off = {
             enabled = true;
-            timeout = 150;  # Turn off display sooner
+            timeout = 150; # Turn off display sooner
             action = "command";
             command = "${screen-off}";
             resume_command = "${screen-on}";
@@ -64,34 +84,42 @@ in {
       };
     };
   };
+  systemd.user.services.noctalia.Service.OOMPolicy = "continue";
+  home.pointerCursor = {
+    enable = true;
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Classic";
+    size = 48;
+    gtk.enable = true;
+  };
+
   home.packages = with pkgs; [
     mouse-inhibit
-    grim
-    slurp
     wl-clipboard
     xwayland-satellite
-    nordic
     hicolor-icon-theme
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-desktop
   ];
 
   xdg = {
-    enable = pkgs.stdenv.isLinux;
-    configFile."mimeapps.list" = lib.mkIf pkgs.stdenv.isLinux {
+    enable = pkgs.stdenv.hostPlatform.isLinux;
+    configFile."mimeapps.list" = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       force = true;
     };
-    mime.enable = pkgs.stdenv.isLinux;
+    mime.enable = pkgs.stdenv.hostPlatform.isLinux;
     mimeApps = {
-      enable = pkgs.stdenv.isLinux;
+      enable = pkgs.stdenv.hostPlatform.isLinux;
       defaultApplications = {
         "text/html" = "firefox.desktop";
         "x-scheme-handler/http" = "firefox.desktop";
         "x-scheme-handler/https" = "firefox.desktop";
         "application/xhtml+xml" = "firefox.desktop";
         "application/pdf" = "firefox.desktop";
+        "x-scheme-handler/claude" = "claude-desktop.desktop";
       };
     };
     portal = {
-      enable = pkgs.stdenv.isLinux;
+      enable = pkgs.stdenv.hostPlatform.isLinux;
       extraPortals = [
         pkgs.xdg-desktop-portal-gnome
         pkgs.xdg-desktop-portal-gtk
@@ -99,41 +127,67 @@ in {
     };
   };
 
-
-  programs.niri = {
+  wayland.windowManager.niri = {
     enable = true;
-    package = pkgs.niri-unstable;
 
     settings = {
+      cursor.xcursor-theme = "Bibata-Modern-Classic";
       input.touchpad = {
-        dwt = true;
+        dwt = { };
+        natural-scroll = { };
+        click-method = "clickfinger";
       };
       layout = {
         default-column-width.proportion = 0.5;
       };
       switch-events = {
-        lid-close.action.spawn = ["noctalia" "msg" "session" "lock"];
+        lid-close.spawn = [
+          "noctalia"
+          "msg"
+          "session"
+          "lock"
+        ];
       };
-      window-rules = [
+      window-rule = {
+        match._props.app-id = "^alacritty-yazi$";
+        open-floating = true;
+      };
+      _children = [
+        { workspace._args = [ "browser" ]; }
+        { workspace._args = [ "terminal" ]; }
+        { workspace._args = [ "im" ]; }
         {
-          matches = [{ app-id = "^alacritty-yazi$"; }];
-          open-floating = true;
+          window-rule = {
+            match._props.app-id = "^(firefox|thunderbird)$";
+            open-on-workspace = "browser";
+          };
+        }
+        {
+          window-rule = {
+            match._props.app-id = "^Alacritty$";
+            open-on-workspace = "terminal";
+          };
+        }
+        {
+          window-rule = {
+            match._props.app-id = "(?i)^(slack|signal|org\\.telegram\\.desktop|teams-for-linux)$";
+            open-on-workspace = "im";
+          };
+        }
+        {
+          spawn-at-startup._args = [
+            "fcitx5"
+            "-d"
+          ];
+        }
+        { spawn-at-startup._args = [ "blueman-applet" ]; }
+        {
+          spawn-at-startup._args = [
+            "nm-applet"
+            "--indicator"
+          ];
         }
       ];
-      spawn-at-startup = [
-          {
-            command = ["fcitx5" "-d"];
-          }
-          {
-            command = ["blueman-applet"];
-          }
-          {
-            command = ["nm-applet" "--indicator"];
-          }
-          {
-            command = ["noctalia"];
-          }
-        ];
     };
   };
 }

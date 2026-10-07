@@ -6,9 +6,6 @@
   ...
 }:
 {
-  nixpkgs = {
-    overlays = lib.optional isLinux inputs.niri.overlays.niri;
-  };
   imports = [
     ./shell
     ./programs/programs.nix

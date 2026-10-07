@@ -5,17 +5,45 @@
       withNvidia = false;
     })
     ./xps-14-da14260
-    ./ipu7/module.nix
     ./hardware-configuration.nix
     ../common/aoli.nix
+    inputs.intel-lpmd-flake.nixosModules.default
+    inputs.sops-nix.nixosModules.sops
   ];
 
-  # IPU7 camera HAL stack from nixpkgs PR #542085; remove together with
-  # ./ipu7 once the PR is merged.
-  nixpkgs.overlays = [ (import ./ipu7/overlay.nix) ];
-
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
-  networking.hostName = "ruby";
+  networking.hostName = "aoli-xps14";
+
+  services.gnome.gcr-ssh-agent.enable = false;
+
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.secrets.fleet-enroll-secret = {
+    sopsFile = ../../secrets/ruby.yaml;
+    restartUnits = [ "orbit.service" ];
+  };
+
+  services.orbit = {
+    enable = true;
+    fleetUrl = "https://fleet.incalmo.ai";
+    enrollSecretPath = config.sops.secrets.fleet-enroll-secret.path;
+    enableScripts = false;
+    desktop = {
+      enable = true;
+      package = pkgs.writeShellScriptBin "fleet-desktop" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        exec ${pkgs.fleet-desktop}/bin/fleet-desktop "$@"
+      '';
+    };
+  };
+  # Orbit uses sudo to launch Fleet Desktop as the logged-in user.
+  systemd.services.orbit.path = [ pkgs.sudo ];
+
+  programs.firefox = {
+    enable = true;
+    preferences."media.webrtc.camera.allow-pipewire" = false;
+  };
+
+  virtualisation.docker.enable = lib.mkForce false;
 
   programs._1password.enable = true;
   programs._1password-gui = {
@@ -23,8 +51,6 @@
     # Required for browser-extension pairing and system-authentication unlock.
     polkitPolicyOwners = [ "aoli" ];
   };
-  # nixpkgs' firefox runs as ".firefox-wrapped", which is not on 1Password's
-  # built-in browser allowlist; Chrome ("chrome") is allowed by default.
   environment.etc."1password/custom_allowed_browsers" = {
     text = ''
       .firefox-wrapped
@@ -51,12 +77,6 @@
     };
     keyboards.realforce = {
       devices = [ "/dev/input/by-id/usb-Topre_REALFORCE_87_US-event-kbd" ];
-      # kanata's uinput device defaults to bus i8042, which libinput's shipped
-      # "MatchBus=ps2 -> AttrKeyboardIntegration=internal" quirk tags as the
-      # built-in keyboard. libinput pairs the internal keyboard with the lid
-      # switch, so a keypress while the lid reads closed is taken as proof the
-      # switch is stuck and it forces the lid open -- relighting the internal
-      # panel under a closed lid. Announce this external board as what it is.
       extraDefCfg = ''
         linux-output-device-name "kanata realforce"
         linux-output-device-bus-type USB
@@ -72,27 +92,47 @@
     };
   };
 
-  # brightnessctl's rules chgrp the backlight to "video" and make it group-writable;
-  # without them /sys/class/backlight/intel_backlight/brightness is root-only.
   environment.systemPackages = [
     pkgs.brightnessctl
-    pkgs.docker-compose
   ];
   services.udev.packages = [ pkgs.brightnessctl ];
 
   boot.kernelParams = [ "pcie_aspm.policy=powersupersave" ];
   boot.extraModprobeConfig = "options snd_hda_intel power_save=1";
+  boot.kernel.sysctl = {
+    "vm.dirty_writeback_centisecs" = 1500;
+    "kernel.nmi_watchdog" = 0;
+  };
+
+  networking.networkmanager.wifi.powersave = false;
+
+  services.resolved.enable = true;
+  services.resolved.settings.Resolve.ResolveUnicastSingleLabel = true;
+  networking.networkmanager.dns = "systemd-resolved";
+
+  services.intel-lpmd = {
+    enable = true;
+    config.custom = {
+      filename = "intel_lpmd_config_F6_M204.xml";
+      content =
+        builtins.replaceStrings
+          [ "<BalancedDef>-1</BalancedDef>" "<PowersaverDef>-1</PowersaverDef>" ]
+          [ "<BalancedDef>0</BalancedDef>" "<PowersaverDef>0</PowersaverDef>" ]
+          (builtins.readFile "${inputs.intel-lpmd-flake.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/xml/intel_lpmd_config_F6_M204.xml");
+    };
+  };
+
+  services.thermald.configFile = ./thermal-conf.xml;
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "lock";
+    HandleLidSwitchDocked = "ignore";
     IdleAction = "ignore";
   };
 
-  # power-profiles-daemon has no built-in AC/battery switching, so drive it from
-  # the AC adapter's udev events (and once at boot, when udev coldplugs it).
   systemd.services."power-profile@" = {
     description = "Set power profile to %I";
     serviceConfig = {
@@ -108,8 +148,12 @@
     SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="power-profile@balanced.service"
 
     ACTION=="add|change", SUBSYSTEM=="pci", ATTR{power/control}="auto"
-    # USB autosuspend makes HID devices drop off the bus (Razer Basilisk V3);
-    # keep non-hub USB devices awake. Hubs (class 09) keep the kernel default.
+    ACTION=="add|change", SUBSYSTEM=="pci", ATTR{class}=="0x028000", ATTR{power/control}="on"
     ACTION=="add|change", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{bDeviceClass}!="09", ATTR{power/control}="on"
+
+    ACTION=="add|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
+    ACTION=="add|change", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0853", ATTR{idProduct}=="0145", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
+
+    ACTION=="add|change", SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="2", ATTR{power/control}="auto"
   '';
 }

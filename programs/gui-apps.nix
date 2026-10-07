@@ -2,7 +2,9 @@
 # On macOS these are installed via nix-darwin (environment.systemPackages) so
 # they get proper /Applications/Nix Apps aliases that Spotlight/Launchpad index;
 # on Linux they stay in the home-manager profile.
-pkgs: with pkgs; [
+{ pkgs, inputs }:
+with pkgs;
+[
   google-chrome
   firefox
   qtpass
@@ -12,4 +14,5 @@ pkgs: with pkgs; [
   signal-desktop
   telegram-desktop
   zoom-us
+  inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt
 ]

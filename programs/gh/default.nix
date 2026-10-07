@@ -12,6 +12,7 @@
       pull.rebase = false;
     };
     ignores = [
+      ".env"
       ".venv/"
       ".envrc"
       ".direnv/"
@@ -43,8 +44,20 @@
       revset-aliases = {
         "immutable_heads()" = "present(trunk()) | tags()";
       };
+      aliases.push = [ "git" "push" ];
+      # Publishing @ starts a new working change, including pushes from jjui.
+      # Outside git push, remote bookmarks retain the normal mutability rules.
+      "--scope" = [
+        {
+          "--when".commands = [ "git push" ];
+          revset-aliases."immutable_heads()" = "present(trunk()) | tags() | remote_bookmarks()";
+        }
+      ];
       ui = {
         always-allow-large-revsets = true;
+      };
+      snapshot = {
+        max-new-file-size = "50MiB";
       };
     };
   };

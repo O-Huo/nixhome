@@ -6,6 +6,7 @@
       "toml"
       "rust"
       "latex"
+      "mermaid"
     ];
     userSettings = {
       vim_mode = true;

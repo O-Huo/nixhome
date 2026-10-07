@@ -1,8 +1,8 @@
 {
   pkgs,
+  inputs,
   config,
   lib,
-  starship-jj,
   isHeadless ? false,
   ...
 }:
@@ -17,23 +17,23 @@
     ./yazi
   ]
   ++ lib.optionals (!isHeadless) [
-    ./vscode/vscode.nix
+    # ./vscode/vscode.nix
     ./browserpass
     ./alacritty
     ./zed
     ./thunderbird
   ];
 
+  programs.btop.enable = true;
+
   home.packages = [
-    starship-jj
     pkgs.gnupg
+    pkgs.tree
     pkgs.yubikey-manager
     pkgs.awscli2
     pkgs.nix-output-monitor
     pkgs.ripgrep
     pkgs.cachix
-    pkgs.btop
-    pkgs.codex
     pkgs.pciutils
     # pkgs.claude-code
     pkgs.nix-index
@@ -87,12 +87,13 @@
     pkgs.zed-editor
     pkgs.alacritty
     pkgs.browserpass
-    pkgs.vscode
-    pkgs.texliveFull
+    # pkgs.vscode
+    # pkgs.texliveFull
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) (import ./gui-apps.nix pkgs)
-  ++ pkgs.lib.optionals (pkgs.stdenv.isLinux && !isHeadless) [
-    pkgs.winboat
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) (import ./gui-apps.nix {
+    inherit pkgs inputs;
+  })
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isLinux && !isHeadless) [
     pkgs.gnupg
     pkgs.seahorse
     pkgs.gnome-keyring
@@ -100,10 +101,11 @@
     pkgs.nautilus
     pkgs.r2modman
     pkgs.dragon-drop
+    pkgs.ueberzugpp
     pkgs.rr
     pkgs.kdePackages.okular
     pkgs.usbutils
   ]
-  ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin) [
+  ++ pkgs.lib.optionals (pkgs.stdenv.hostPlatform.isDarwin) [
   ];
 }

@@ -1,17 +1,6 @@
 {
   description = "My Nix environment";
-  nixConfig = {
-    extra-substituters = [
-      "https://nix-community.cachix.org"
-      "https://niri.cachix.org"
-      "https://nixos-raspberrypi.cachix.org"
-      "https://chaotic-nyx.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
-      "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
-    ];
-  };
+  # Binary caches and their trusted keys are configured by the system modules.
   inputs = {
     # TODO: revert to NixOS/nixos-hardware/master once PR #1912 (Dell XPS 14
     # DA14260 / Panther Lake) is merged.
@@ -20,6 +9,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-darwin = {
@@ -37,22 +30,20 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    niri = {
-      url = "github:sodiboo/niri-flake";
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
     catppuccin.url = "github:catppuccin/nix";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nur.url = "github:nix-community/nur";
-    starship-jj = {
-      url = "gitlab:lanastara_foss/starship-jj";
+    intel-lpmd-flake = {
+      url = "github:dmfrpro/intel-lpmd-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -66,9 +57,7 @@
       vscode-server,
       nur,
       catppuccin,
-      niri,
       nixos-hardware,
-      starship-jj,
       ...
     }@inputs:
     let
@@ -84,9 +73,17 @@
         system = "aarch64-darwin";
         config = nixpkgsConfig;
       };
-      pkgsArmLinux = import nixpkgs {
-        system = "aarch64-linux";
-        config = nixpkgsConfig;
+      chaoticModule = {
+        chaotic.nyx.overlay.enable = false;
+        nixpkgs.overlays = [
+          (import "${inputs.chaotic}/overlays/cache-friendly.nix" {
+            flakes = {
+              inherit (inputs.chaotic.inputs) nixpkgs;
+              self = inputs.chaotic;
+            };
+            inherit nixpkgsConfig;
+          })
+        ];
       };
 
       # Import shells function properly
@@ -103,6 +100,7 @@
         nixos.lib.nixosSystem {
           modules = [
             { nixpkgs.config = nixpkgsConfig; }
+            chaoticModule
             nur.modules.nixos.default
             vscode-server.nixosModules.default
             inputs.chaotic.nixosModules.default
@@ -114,56 +112,23 @@
         ${host} = mkSystem [ ./hosts/${host} ];
       };
 
-      mkJexSystem =
-        modules:
-        nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs;
-            inherit (inputs) nixos-raspberrypi;
-          };
-          modules = [
-            {
-              nixpkgs.hostPlatform = "aarch64-linux";
-              nixpkgs.config = nixpkgsConfig;
-              hardware.deviceTree.enable = true;
-              system.boot.loader.kernelFile = "Image";
-            }
-            inputs.nixos-raspberrypi.lib.inject-overlays
-            nur.modules.nixos.default
-            vscode-server.nixosModules.default
-            inputs.chaotic.nixosModules.default
-            ./hosts/jex
-          ]
-          ++ modules;
-        };
-
       accounts = [
         "aoli@octal"
         "aoli@ruby"
-        "aoli@jex"
         "aoli@arrakis"
         "hao@linux"
         "hao@nixnas"
       ];
-      hostSystems = {
-        jex = "aarch64-linux";
-      };
       headlessHosts = [
-        "jex"
         "arrakis"
       ];
-      pkgsFor = {
-        "x86_64-linux" = pkgsX86;
-        "aarch64-linux" = pkgsArmLinux;
-      };
       mkAccount =
         account:
         let
           parts = nixpkgs.lib.splitString "@" account;
           user = builtins.elemAt parts 0;
           host = builtins.elemAt parts 1;
-          system = hostSystems.${host} or "x86_64-linux";
-          pkgs = pkgsFor.${system};
+          pkgs = pkgsX86;
           isHeadless = builtins.elem host headlessHosts;
         in
         {
@@ -174,7 +139,6 @@
               (./programs/hosts + "/${host}.nix")
             ]
             ++ nixpkgs.lib.optionals (!isHeadless) [
-              niri.homeModules.niri
               ./programs/niri
             ]
             ++ [
@@ -184,20 +148,18 @@
             ];
             extraSpecialArgs = {
               inherit inputs isHeadless;
-              isLinux = pkgs.stdenv.isLinux;
-              starship-jj = starship-jj.packages.${system}.default;
+              isLinux = pkgs.stdenv.hostPlatform.isLinux;
             };
           };
         };
     in
     {
-      packages = home-manager.packages;
+      packages = nixpkgs.lib.getAttrs [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ] home-manager.packages;
 
-      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts) // {
-        jex = mkJexSystem [ ];
-      };
-
-      images.jex = (mkJexSystem [ ./hosts/jex/sd-image.nix ]).config.system.build.sdImage;
+      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
 
       darwinConfigurations."Aos-MacBook-Air" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
@@ -221,7 +183,6 @@
             inherit inputs;
             isLinux = false;
             isHeadless = false;
-            starship-jj = starship-jj.packages.aarch64-darwin.default;
           };
         };
       };

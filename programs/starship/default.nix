@@ -16,18 +16,6 @@
           command = "jj root >/dev/null 2>&1 || starship module git_branch";
           description = "Only show git_branch if we're not in a jj repo";
         };
-        jj = {
-          command = "prompt";
-          format = "$output";
-          ignore_timeout = true;
-          shell = [
-            "starship-jj"
-            "--ignore-working-copy"
-            "starship"
-          ];
-          use_stdin = false;
-          when = true;
-        };
       };
     };
   };

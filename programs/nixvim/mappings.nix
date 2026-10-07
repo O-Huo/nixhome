@@ -274,9 +274,9 @@
       # Tree
       {
         key = "<Leader>e";
-        action = "<cmd> NvimTreeFocus <CR>";
+        action = "<cmd> NvimTreeFindFile <CR>";
         mode = "n";
-        options.desc = "Focus tree";
+        options.desc = "Reveal current file in tree";
       }
 
       {

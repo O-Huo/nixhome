@@ -1,8 +1,8 @@
 # Adopted from nixos-hardware PR #1912 (cooparo/nixos-hardware,
 # dell/xps/14-da14260) with the hardware-ISP patch applied: the camera relay
-# uses icamerasrc (hardware ISP via the IPU7 camera HAL, nixpkgs PR #542085)
+# uses icamerasrc (hardware ISP via the upstream IPU7 camera HAL)
 # instead of libcamerasrc's software ISP. Drop this directory in favor of
-# inputs.nixos-hardware.nixosModules.dell-xps-14-da14260 once both PRs are
+# inputs.nixos-hardware.nixosModules.dell-xps-14-da14260 once that PR is
 # merged. The common/ modules are still imported from the nixos-hardware input.
 {
   lib,
@@ -18,27 +18,53 @@
     "${inputs.nixos-hardware}/common/pc/ssd"
   ];
 
-  # We need at least 7.0 to have a working mic
-  boot.kernelPackages = lib.mkIf (lib.versionOlder pkgs.linux.version "7.0") (
-    lib.mkDefault pkgs.linuxPackages_latest
-  );
-
   hardware.ipu7 = {
     enable = true;
     platform = "ipu75xa";
   };
+
+  # The HAL must follow the sensor -> Intel CVS -> IPU7 topology on kernel
+  # 7.2. Without this it parses "Intel CVS" as the sensor's I2C address and
+  # tries to open the nonexistent "ov08x40 S", failing with EPIPE.
+  nixpkgs.overlays = [
+    (final: prev: {
+      ipu75xa-camera-hal = prev.ipu75xa-camera-hal.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./camera-hal-kernel-7.2-cvs-bridge.patch ];
+      });
+    })
+  ];
 
   # hardware.ipu7 brings its own v4l2-relayd instance, but it creates the
   # loopback with too few buffers for full framerate; the hand-rolled relay
   # service below replaces it.
   services.v4l2-relayd.instances.ipu7.enable = false;
 
+  # Only the relay should open the raw IPU7 devices. Browsers can otherwise
+  # select /dev/video0 instead of the loopback and keep its buffers busy,
+  # preventing the camera HAL from starting. Remove uaccess before
+  # 73-seat-late.rules grants the logged-in user access.
+  services.udev.packages = [
+    (pkgs.writeTextFile {
+      name = "ipu7-camera-udev-rules";
+      destination = "/lib/udev/rules.d/71-ipu7-camera.rules";
+      text = ''
+        SUBSYSTEM=="media", DRIVERS=="intel-ipu7", MODE="0600", GROUP="root", TAG-="uaccess"
+        SUBSYSTEM=="video4linux", DRIVERS=="intel-ipu7", MODE="0600", GROUP="root", TAG-="uaccess"
+      '';
+    })
+  ];
+
+  # The HAL owns the physical sensor; PipeWire should expose the relay's
+  # processed V4L2 output instead of opening it again through libcamera.
+  services.pipewire.wireplumber.extraConfig."ipu7-camera" = {
+    "wireplumber.profiles".main."monitor.libcamera" = "disabled";
+  };
+
   # Intel CVS driver for Synaptics SVP7500 camera bridge (06CB:0701).
   # Without this the IPU7 camera stack does not enumerate even though the
   # kernel-side intel_ipu7 driver detects the sensor (OVTI08F4 / OV08F4).
-  # The patch removes a spurious IRQF_ONESHOT flag from a non-threaded IRQ
-  # handler that causes the bridge to wedge after brief idle periods.
-  # See: https://github.com/intel/vision-drivers/issues/37
+  # Backport the wake-IRQ fix so the camera does not claim the GPIO shared
+  # with the audio amplifiers and prevent the sound card from registering.
   boot.extraModulePackages = [
     (config.boot.kernelPackages.callPackage ./intel-cvs { })
     config.boot.kernelPackages.v4l2loopback
@@ -51,12 +77,6 @@
   # device has a degenerate framerate range that breaks GStreamer caps
   # negotiation. The relay service below creates a configured device at runtime.
   boot.extraModprobeConfig = "options v4l2loopback devices=0";
-
-  # Prevent the SVP7500 USB bridge from autosuspending; the bridge firmware
-  # has issues with power-state transitions that cause it to wedge on resume.
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="06cb", ATTRS{idProduct}=="0701", ATTR{power/autosuspend}="-1"
-  '';
 
   # Most applications (browsers, video-conferencing, cheese) only speak V4L2
   # and cannot use the IPU7 camera HAL directly. v4l2-relayd runs a GStreamer
@@ -134,4 +154,7 @@
 
   # Allows for updating firmware via `fwupdmgr`.
   services.fwupd.enable = true;
+
+  systemd.services.fwupd-refresh.enable = false;
+  systemd.timers.fwupd-refresh.enable = false;
 }

@@ -57,46 +57,4 @@
     fsType = "ext4";
     options = [ "nofail" "x-systemd.device-timeout=0" ];
   };
-
-  # llama.cpp SYCL inference server on the B70.
-  # Models live on the fast NVMe; bind to localhost only.
-  virtualisation.docker.enable = true;
-  virtualisation.oci-containers = {
-    backend = "docker";
-    containers.llama-server = {
-      image = "ghcr.io/ggml-org/llama.cpp:server-intel";
-      pull = "newer";
-      autoStart = true;
-      ports = [ "8080:8080" ];
-      # Writable cache for `-hf` model downloads.
-      volumes = [ "/mnt/pcie5ssd/llm-models:/root/.cache/llama.cpp" ];
-      environment = {
-        # Flip to level_zero:1 if this picks the iGPU instead of the B70.
-        ONEAPI_DEVICE_SELECTOR = "level_zero:0";
-      };
-      cmd = [
-        "-m" "/root/.cache/llama.cpp/Qwen3.6-27B-MTP-UD-Q4_K_XL.gguf"
-        "-ngl" "99"
-        "--host" "0.0.0.0"
-        "--port" "8080"
-        "--temp" "1.0"
-        "--top-k" "20"
-        "--top-p" "0.95"
-        "--min-p" "0.00"
-        "--chat-template-kwargs" "{\"enable_thinking\": false}"
-        "-c" "65536"
-        # Quantize KV cache to q8_0 (~half VRAM, negligible quality loss).
-        # Flash attention is required for quantized V cache.
-        "--cache-type-k" "q8_0"
-        "--cache-type-v" "q8_0"
-        "-fa" "on"
-      ];
-      extraOptions = [
-        "--device=/dev/dri"
-        "--ipc=host"
-        # Image ships a HEALTHCHECK that probes before the model finishes loading.
-        "--no-healthcheck"
-      ];
-    };
-  };
 }

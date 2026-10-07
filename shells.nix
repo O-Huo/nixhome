@@ -2,6 +2,9 @@ pkgs: with pkgs; {
   default = mkShellNoCC {
     buildInputs = [
       nixfmt
+      sops
+      age
+      ssh-to-age
     ];
   };
 
@@ -56,7 +59,7 @@ pkgs: with pkgs; {
       cargo
       protobuf
     ]
-    ++ lib.optionals stdenv.isLinux [
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       bpftrace
       perf
     ];

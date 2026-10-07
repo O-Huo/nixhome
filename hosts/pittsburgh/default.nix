@@ -10,14 +10,8 @@
     ./china-proxy.nix
   ];
   networking.hostName = "xiangpeng-pittsburgh";
+  security.sudo.wheelNeedsPassword = false;
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      homebridge-config-ui-x = prev.homebridge-config-ui-x.override {
-        nodejs_22 = final.nodejs_24;
-      };
-    })
-  ];
   services.homebridge = {
     enable = true;
     openFirewall = true;
