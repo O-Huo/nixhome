@@ -86,6 +86,24 @@
           "toggle"
         ];
       };
+      "Mod+M" = {
+        _props.allow-when-locked = true;
+        spawn = [
+          "wpctl"
+          "set-mute"
+          "@DEFAULT_AUDIO_SINK@"
+          "toggle"
+        ];
+      };
+      "Mod+Shift+M" = {
+        _props.allow-when-locked = true;
+        spawn = [
+          "wpctl"
+          "set-mute"
+          "@DEFAULT_AUDIO_SOURCE@"
+          "toggle"
+        ];
+      };
 
       "XF86MonBrightnessUp" = {
         _props.allow-when-locked = true;

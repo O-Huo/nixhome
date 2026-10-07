@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
   ];
   networking.hostName = "xiangpeng-pittsburgh";
+  security.sudo.wheelNeedsPassword = false;
 
   services.homebridge = {
     enable = true;
