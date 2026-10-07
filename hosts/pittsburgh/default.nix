@@ -7,6 +7,7 @@
     ../common/hao.nix
     ../common/aoli.nix
     ./hardware-configuration.nix
+    ./china-proxy.nix
   ];
   networking.hostName = "xiangpeng-pittsburgh";
 
