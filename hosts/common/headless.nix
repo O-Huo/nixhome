@@ -40,7 +40,10 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
-  services.automatic-timezoned.enable = true;
+  time.timeZone = "America/Los_Angeles";
+  services.automatic-timezoned.enable = false;
+  services.geoclue2.enableWifi = false;
+  networking.networkmanager.wifi.powersave = false;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
