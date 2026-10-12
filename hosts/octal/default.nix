@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   inputs,
   lib,
@@ -14,8 +15,22 @@
     ../common/aoli.nix
   ];
 
+  # rr (record/replay debugger) support. ptrace_scope is set in common/headless.nix.
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
+  # Zen CPUs need the SpecLockMap hardware optimization disabled (MSR
+  # 0xC0011020 bit 54) or rr's retired-branch counter is unreliable and rr
+  # refuses to start. See https://github.com/rr-debugger/rr/wiki/Zen
+  boot.extraModulePackages = [ config.boot.kernelPackages.rr-zen_workaround ];
+  boot.kernelModules = [ "zen_workaround" ];
   networking.hostName = "octal";
+
+  # Suspend is disabled on this machine: resumes have been unreliable (see
+  # below). Mask the sleep targets so nothing (idle timers, logind, manual
+  # `systemctl suspend`) can put it to sleep. Overrides common/headless.nix.
+  systemd.targets.sleep.enable = lib.mkForce false;
+  systemd.targets.suspend.enable = lib.mkForce false;
+  systemd.targets.hibernate.enable = lib.mkForce false;
+  systemd.targets.hybrid-sleep.enable = lib.mkForce false;
 
   # Suspend/resume hardening. Since idle suspend was enabled (2026-09-29), two
   # of three resumes ended in a hard reset with no journal written after wake,

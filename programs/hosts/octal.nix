@@ -2,8 +2,10 @@
 {
   programs.noctalia.settings.shell.session.power.suspend = "${pkgs.systemd}/bin/systemctl suspend";
 
+  # Idle suspend disabled: resumes on octal have been unreliable (see
+  # hosts/octal/default.nix). Lock still happens; the machine stays awake.
   programs.noctalia.settings.idle.behavior.suspend = {
-    enabled = true;
+    enabled = false;
     timeout = 600;
     # Noctalia restarts idle timers after the existing two-minute lock.
     locked_timeout = 480;

@@ -19,6 +19,12 @@
       support_kitty_graphics_protocol = false;
       keybinds = {
         unbind = "Ctrl b";
+        shared_except = {
+          _args = [ "locked" ];
+          "bind \"Alt n\"" = {
+            NewPane = "Down";
+          };
+        };
       };
     };
   };
