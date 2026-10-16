@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }: {
+{ config, pkgs, inputs, ... }: {
   imports = [
     (import ../common {
       inherit pkgs inputs;
@@ -42,8 +42,6 @@
     enable = true;
     preferences."media.webrtc.camera.allow-pipewire" = false;
   };
-
-  virtualisation.docker.enable = lib.mkForce false;
 
   programs._1password.enable = true;
   programs._1password-gui = {
