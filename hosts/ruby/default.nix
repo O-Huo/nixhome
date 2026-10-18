@@ -103,6 +103,10 @@
   };
 
   services.resolved.enable = true;
+  services.tailscale.extraSetFlags = [
+    "--accept-dns=true"
+    "--accept-routes=true"
+  ];
   services.resolved.settings.Resolve.ResolveUnicastSingleLabel = true;
   networking.networkmanager.dns = "systemd-resolved";
 

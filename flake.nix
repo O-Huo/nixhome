@@ -93,6 +93,7 @@
         "madison"
         "octal"
         "ruby"
+        "calmee"
         "nixnas"
       ];
       mkSystem =
@@ -115,6 +116,7 @@
       accounts = [
         "aoli@octal"
         "aoli@ruby"
+        "aoli@calmee"
         "aoli@arrakis"
         "hao@linux"
         "hao@nixnas"
@@ -159,7 +161,12 @@
         "aarch64-darwin"
       ] home-manager.packages;
 
-      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts);
+      nixosConfigurations = nixos.lib.mergeAttrsList (map mkHost hosts) // {
+        calmee-installer = nixos.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [ ./hosts/calmee/installer.nix ];
+        };
+      };
 
       darwinConfigurations."Aos-MacBook-Air" = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";

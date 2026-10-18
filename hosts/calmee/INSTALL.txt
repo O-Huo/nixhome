@@ -1,0 +1,46 @@
+CALMEE INSTALLER
+
+This USB boots a live environment. It does not automatically erase or install
+anything on the desktop. Internet access is needed for installation.
+
+1. Boot the USB in UEFI mode. Connect Ethernet if possible.
+   Run: ip -br address
+   From Ruby: ssh nixos@<the-desktop-IP>
+   SSH accepts the public keys already configured for aoli in this repository.
+   Local console access and sudo are available as on the standard NixOS ISO.
+
+2. Identify the actual hardware before choosing the internal installation disk:
+   lscpu
+   lspci -nn
+   lsblk -o NAME,SIZE,MODEL,TRAN,TYPE,MOUNTPOINTS
+   Confirm GPU support in hosts/calmee/default.nix before installation.
+   NVIDIA may need withNvidia = true and a compatible driver/kernel selection.
+
+3. Partition/format the chosen INTERNAL disk, then mount root at /mnt and its
+   EFI system partition at /mnt/boot. Decide on encryption before formatting;
+   Ruby uses LUKS + ext4. Do not use Ruby's UUIDs or the USB's device path.
+   The partitioning commands depend on the disk and are intentionally not run
+   automatically. The root and boot mounts must both exist before continuing.
+
+4. As root (sudo -i), copy the bundled configuration and generate hardware data:
+   mountpoint /mnt
+   mountpoint /mnt/boot
+   mkdir -p /mnt/etc/nixos
+   cp -a /etc/calmee-source/. /mnt/etc/nixos/
+   chmod -R u+w /mnt/etc/nixos
+   nixos-generate-config --root /mnt --show-hardware-config > /mnt/etc/nixos/hosts/calmee/hardware-configuration.nix
+
+5. Review the GPU settings and generated hardware configuration, then install:
+   nixos-install --flake path:/mnt/etc/nixos#calmee
+   nixos-enter --root /mnt -c 'passwd aoli'
+   Set aoli's password before rebooting so login and sudo work.
+   reboot
+
+6. After logging in as aoli, activate the bundled Home Manager configuration:
+   nix build 'path:/etc/nixos#homeConfigurations."aoli@calmee".activationPackage' --out-link /tmp/calmee-home
+   /tmp/calmee-home/activate
+   Log out and back in to start the configured desktop session.
+
+Keep the generated hardware file and any GPU adjustments in your working copy
+on Ruby. Tailscale needs its own login; Fleet enrollment needs a new host secret
+and is not copied from Ruby. No private SSH or age keys are included in this ISO.
