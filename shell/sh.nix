@@ -1,4 +1,9 @@
-{ ... }:
+{
+  lib,
+  isLinux ? false,
+  isHeadless ? false,
+  ...
+}:
 {
   programs = {
     bat.enable = true;
@@ -18,6 +23,28 @@
         set -g fish_greeting
       '';
     };
+  };
+
+  # Keep the profile declarative while allowing Rime to save its user dictionary.
+  xdg.configFile."fcitx5/profile" = lib.mkIf (isLinux && !isHeadless) {
+    force = true;
+    text = ''
+      [Groups/0]
+      Name=Default
+      Default Layout=us
+      DefaultIM=rime
+
+      [Groups/0/Items/0]
+      Name=keyboard-us
+      Layout=
+
+      [Groups/0/Items/1]
+      Name=rime
+      Layout=
+
+      [GroupOrder]
+      0=Default
+    '';
   };
 
   home.file = {

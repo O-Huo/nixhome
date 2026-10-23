@@ -21,7 +21,7 @@ in
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
-    fcitx5.ignoreUserConfig = false; # see modules/home/fcitx5.nix
+    fcitx5.ignoreUserConfig = false; # Home Manager manages the profile in shell/sh.nix.
     fcitx5.waylandFrontend = true; # NOT to set GTK_IM_MODULE=fcitx
     fcitx5.addons = with pkgs; [
       qt6Packages.fcitx5-configtool

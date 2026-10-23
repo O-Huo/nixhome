@@ -1,4 +1,9 @@
-{ pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 {
   imports = [
     (import ../common {
@@ -14,6 +19,11 @@
   system.stateVersion = "26.05";
   boot.initrd.systemd.enable = true;
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
+
+  # The Thelio Io controller needs its driver and temperature-based fan daemon.
+  boot.extraModulePackages = [ config.boot.kernelPackages.system76-io ];
+  boot.kernelModules = [ "system76-thelio-io" ];
+  hardware.system76.power-daemon.enable = true;
 
   services.gnome.gcr-ssh-agent.enable = false;
   programs.firefox = {
