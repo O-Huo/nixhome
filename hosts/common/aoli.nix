@@ -17,6 +17,7 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFDOWYrrl2qfy3wQlkPvtydLozCa3yCe8Tn3MQ/VL27e"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIADuUNeWGvQM3BX7q79a6vN8kY/BQlSrYsVznpIgfRhn"
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAILAvFZRTJDHetKiYwxwZV+WQjq5l6FvjqZrJmW8McMORAAAABHNzaDo= aoli@aoli-xps14"
     ];
   };
 }
