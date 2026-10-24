@@ -65,6 +65,11 @@ in
         directory = ./imgs;
         fill_mode = "crop";
         fill_color = "#000000";
+        automation = {
+          enabled = true;
+          interval_seconds = 1800;
+          order = "random";
+        };
       };
       idle = {
         behavior = {
