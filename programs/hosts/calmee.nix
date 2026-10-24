@@ -61,7 +61,8 @@
   programs.noctalia.settings.shell.session.power.suspend = "${pkgs.systemd}/bin/systemctl suspend";
 
   programs.noctalia.settings.idle.behavior.suspend = {
-    enabled = true;
+    # Keep this host available for SSH while idle.
+    enabled = false;
     timeout = 600;
     # Noctalia restarts idle timers after the existing two-minute lock.
     locked_timeout = 480;

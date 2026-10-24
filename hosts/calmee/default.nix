@@ -2,6 +2,7 @@
   config,
   pkgs,
   inputs,
+  lib,
   ...
 }:
 {
@@ -16,6 +17,15 @@
   ];
 
   networking.hostName = "calmee";
+
+  # Keep calmee awake for SSH, including when no graphical session is running.
+  # Override the sleep targets enabled in common/headless.nix.
+  systemd.targets.sleep.enable = lib.mkForce false;
+  systemd.targets.suspend.enable = lib.mkForce false;
+  systemd.targets.hibernate.enable = lib.mkForce false;
+  systemd.targets.hybrid-sleep.enable = lib.mkForce false;
+  systemd.targets.suspend-then-hibernate.enable = lib.mkForce false;
+
   system.stateVersion = "26.05";
   boot.initrd.systemd.enable = true;
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
