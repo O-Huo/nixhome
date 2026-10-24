@@ -53,6 +53,19 @@
   services.resolved.enable = true;
   services.resolved.settings.Resolve.ResolveUnicastSingleLabel = true;
   networking.networkmanager.dns = "systemd-resolved";
+
+  # Avoid failed roaming to Incalmo's 6 GHz radio, which stalls SSH.
+  systemd.services.NetworkManager.postStart = ''
+    ${pkgs.networkmanager}/bin/nmcli connection modify Incalmo 802-11-wireless.band a
+  '';
+
+  virtualisation.docker.daemon.settings.default-address-pools = [
+    {
+      base = "10.128.0.0/12";
+      size = 24;
+    }
+  ];
+
   services.tailscale.extraSetFlags = [
     "--accept-dns=true"
     "--accept-routes=true"
