@@ -27,7 +27,6 @@
   systemd.targets.suspend-then-hibernate.enable = lib.mkForce false;
 
   system.stateVersion = "26.05";
-  boot.initrd.systemd.enable = true;
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
 
   # The Thelio Io controller needs its driver and temperature-based fan daemon.
