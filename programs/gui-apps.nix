@@ -14,5 +14,5 @@ with pkgs;
   signal-desktop
   telegram-desktop
   zoom-us
-  (import ./chatgpt { inherit pkgs inputs; })
+  inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.chatgpt
 ]
