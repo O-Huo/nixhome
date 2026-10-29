@@ -29,6 +29,12 @@
   system.stateVersion = "26.05";
   boot.kernel.sysctl."kernel.perf_event_paranoid" = 1;
 
+  # Docker's containerd image store mounts container filesystems again for copies.
+  # Indexing rejects those overlapping mounts with "device or resource busy".
+  boot.extraModprobeConfig = ''
+    options overlay index=off
+  '';
+
   # The Thelio Io controller needs its driver and temperature-based fan daemon.
   boot.extraModulePackages = [ config.boot.kernelPackages.system76-io ];
   boot.kernelModules = [ "system76-thelio-io" ];
