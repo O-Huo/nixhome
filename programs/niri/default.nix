@@ -21,6 +21,32 @@ let
     ${lib.getExe mouse-inhibit} 0
     ${lib.getExe pkgs.niri} msg action power-on-monitors
   '';
+  # Launch apps in order so columns land left-to-right as listed, then
+  # stack Slack under Thunderbird in one column on the "browser" workspace.
+  restore-layout = pkgs.writeShellScript "niri-restore-layout" ''
+    niri=${lib.getExe pkgs.niri}
+    jq=${lib.getExe pkgs.jq}
+    window_id() {
+      $niri msg -j windows | $jq -r --arg app "$1" \
+        'map(select((.app_id // "") | ascii_downcase == $app)) | .[0].id // empty'
+    }
+    wait_for() {
+      for _ in $(seq 60); do
+        id=$(window_id "$1")
+        [ -n "$id" ] && { echo "$id"; return; }
+        sleep 0.5
+      done
+    }
+
+    thunderbird &
+    wait_for thunderbird >/dev/null
+    slack &
+    slack_id=$(wait_for slack)
+    [ -n "$slack_id" ] && $niri msg action consume-or-expel-window-left --id "$slack_id"
+    firefox &
+    alacritty &
+    Telegram &
+  '';
 in
 {
   imports = [
@@ -163,22 +189,32 @@ in
         { workspace._args = [ "im" ]; }
         {
           window-rule = {
-            match._props.app-id = "^(firefox|thunderbird)$";
+            match._props.app-id = "^firefox$";
             open-on-workspace = "browser";
+            default-column-width.proportion = 2.0 / 3.0;
+          };
+        }
+        {
+          window-rule = {
+            match._props.app-id = "(?i)^(thunderbird|slack)$";
+            open-on-workspace = "browser";
+            default-column-width.proportion = 1.0 / 3.0;
           };
         }
         {
           window-rule = {
             match._props.app-id = "^Alacritty$";
             open-on-workspace = "terminal";
+            default-column-width.proportion = 1.0;
           };
         }
         {
           window-rule = {
-            match._props.app-id = "(?i)^(slack|signal|org\\.telegram\\.desktop|teams-for-linux)$";
+            match._props.app-id = "(?i)^(signal|org\\.telegram\\.desktop|teams-for-linux)$";
             open-on-workspace = "im";
           };
         }
+        { spawn-at-startup._args = [ "${restore-layout}" ]; }
         {
           spawn-at-startup._args = [
             "fcitx5"
